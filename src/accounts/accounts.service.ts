@@ -28,6 +28,7 @@ import { KeychainDto } from '../keychains/keychains.dto';
 import { PostageDto } from '../postage/postage.dto';
 import logger from '../../utils/logger';
 import { handleKeychainCopies } from '../../utils/handleKeychainCopies';
+import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Injectable({})
 export class AccountsService {
@@ -270,7 +271,10 @@ export class AccountsService {
   // this method needs be changed for the way it handles passwords, since all we have in the db
   // is the salted password, if they don't send a new password, it will be salting something undefined
   // create a conditional that if no password is sent, the password will stay the same
-  async updateAccount(dto: UpdateAccountDto): Promise<IResponse> {
+  async updateAccount(
+    req: IAuthenticatedRequest,
+    dto: UpdateAccountDto,
+  ): Promise<IResponse> {
     let account: any;
 
     // this version of updating the password is if the user does it in my.kreativeusa.com
@@ -285,7 +289,7 @@ export class AccountsService {
       logger.info(`prisma.account.update initiated in updateAccount`);
       account = await this.prisma.account.update({
         where: {
-          email: dto.email,
+          ksn: req.kreativeAccount.ksn,
         },
         data: {
           email: dto.email,
@@ -304,6 +308,9 @@ export class AccountsService {
       });
       handlePrismaErrors(error);
     }
+
+    // delete sensitive information from account object
+    delete account.bpassword, account.resetCode;
 
     // send all neccessary data back to the client
     const payload: IResponse = {
