@@ -15,6 +15,7 @@ import '@sentry/tracing';
 import { SentryModule } from './sentry/sentry.module';
 import { AuthenticateUserMiddleware } from '../middleware/authenticateUser';
 import { ApplicationsController } from './applications/applications.controller';
+import { AccountsController} from "./accounts/accounts.controller";
 
 @Module({
   imports: [
@@ -52,7 +53,31 @@ export class AppModule implements NestModule {
           path: 'v1/applications/:aidn/appchain/verify',
           method: RequestMethod.GET,
         },
+        {
+          path: 'v1/accounts/signin',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'v1/accounts/signup',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'v1/accounts/:ksn',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'v1/accounts/resetCode/send',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'v1/accounts/resetCode/verify',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'v1/accounts/:ksn/resetPassword',
+          method: RequestMethod.POST,
+        },
       )
-      .forRoutes(ApplicationsController);
+      .forRoutes(ApplicationsController, AccountsController);
   }
 }
