@@ -1,5 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import axios from 'axios';
 import logger from '../utils/logger';
 import { IAuthenticatedRequest } from '../types/IAuthenticatedRequest';
@@ -21,7 +21,8 @@ export class AuthenticateUserMiddleware implements NestMiddleware {
 
     // parses the AIDN header as string to an integer
     // TODO make this implementation a lot better
-    // @ts-ignore some sort of unassignable error is throw so we ignore the typescript error
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore some sort of unassigned error is throw so we ignore the typescript error
     const aidn = parseInt(aidnString);
 
     if (!key || !aidn || !appchain) {
