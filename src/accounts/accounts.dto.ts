@@ -3,10 +3,10 @@ import {
   IsBoolean,
   IsEmail,
   IsNotEmpty,
-  IsNumber,
+  IsNumber, IsOptional,
   IsString,
-  Min,
-} from 'class-validator';
+  Min
+} from "class-validator";
 
 export class SignupDto {
   @IsNotEmpty()
@@ -66,7 +66,8 @@ export class UpdateAccountDto {
   @IsNotEmpty()
   profilePicture: string;
 
-  password?: string;
+  @IsOptional()
+  password: string;
 }
 
 export class UpdateWalletBalanceDto {

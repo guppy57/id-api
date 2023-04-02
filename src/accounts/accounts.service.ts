@@ -345,6 +345,7 @@ export class AccountsService {
       const bpassword: string = await argon2.hash(dto.password);
       logger.info(`password salted in updateAccount to ${bpassword}`);
       updateData.bpassword = bpassword;
+      // TODO send password reset notification email
     }
 
     try {
@@ -611,7 +612,7 @@ export class AccountsService {
 
     // create salted password for update
     const bpassword: string = await argon2.hash(dto.password);
-    logger.info(`password salted in resetPassowrd to ${dto.password}`);
+    logger.info(`password salted in resetPassword to ${dto.password}`);
 
     try {
       // update the password for the account
