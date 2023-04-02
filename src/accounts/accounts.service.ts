@@ -369,7 +369,7 @@ export class AccountsService {
     // delete sensitive information from account object
     delete account.bpassword;
     delete account.resetCode;
-    logger.info(`sensitive information deleted from account object`)
+    logger.info(`sensitive information deleted from account object`);
 
     // send all neccessary data back to the client
     const payload: IResponse = {
