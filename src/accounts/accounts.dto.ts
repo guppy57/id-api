@@ -66,7 +66,6 @@ export class UpdateAccountDto {
   @IsNotEmpty()
   profilePicture: string;
 
-  @IsString()
   password?: string;
 }
 
