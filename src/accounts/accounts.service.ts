@@ -1,10 +1,11 @@
 import {
+  ConflictException,
   Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+  UnauthorizedException
+} from "@nestjs/common";
 import { customAlphabet } from 'nanoid';
 import * as argon2 from 'argon2';
 
@@ -276,12 +277,39 @@ export class AccountsService {
     dto: UpdateAccountDto,
   ): Promise<IResponse> {
     let account: any;
+    let tempAccount: Account;
 
     // this version of updating the password is if the user does it in my.kreativeusa.com
     // this way they are authenticated and do not need a 'password reset code'
     // it generates new password hash with salt
     const bpassword: string = await argon2.hash(dto.password);
     logger.info(`password salted in updateAccount to ${bpassword}`);
+
+    // first we check if the username is available
+    try {
+      // finds the account in the database based on unique email
+      logger.info(`prisma.account.findUnique initiated for ${dto.username}`);
+      tempAccount = await this.prisma.account.findUnique({
+        where: { username: dto.username },
+      });
+    } catch (error) {
+      // handle any other prisma errors that occur
+      logger.error({
+        message: `prisma.account.findUnique error: ${error} for ${dto.username}`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    // if the username is taken, and it is not the same as the current account
+    // we throw a conflict exception
+    if (tempAccount && tempAccount.ksn !== req.kreativeAccount.ksn) {
+      logger.info(
+        `username ${dto.username} is already taken for ${req.kreativeAccount.email}`,
+      );
+      // since there is a conflict we throw this exception with a status code of 409
+      throw new ConflictException('username is already taken');
+    }
 
     try {
       // TODO add email verification flow (if email is different)
