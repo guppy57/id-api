@@ -47,7 +47,7 @@ export class AccountsService {
     let newKSN = 0;
     // create new 'nanoid' function with custom parameters
     const nanoid = customAlphabet('123456789', 8);
-    // loop to create a compltely unique ksn
+    // loop to create a completely unique ksn
     while (!unique) {
       // create new random ksn from function
       newKSN = parseInt(nanoid() as string);
@@ -259,7 +259,7 @@ export class AccountsService {
     });
     this.postage.sendEmail(loginEmailData);
 
-    // send all neccessary data back to the client
+    // send all necessary data back to the client
     const payload: IResponse = {
       statusCode: 200,
       message: 'Account logged in',
@@ -372,7 +372,7 @@ export class AccountsService {
     delete account.resetCode;
     logger.info(`sensitive information deleted from account object`);
 
-    // send all neccessary data back to the client
+    // send all necessary data back to the client
     const payload: IResponse = {
       statusCode: 200,
       message: 'Account updated',
@@ -390,7 +390,7 @@ export class AccountsService {
     let accountChange: any;
 
     // verifies that the keychain given is valid
-    // this method also sends back the current account details, this means we don't need to conduct a seperate
+    // this method also sends back the current account details, this means we don't need to conduct a separate
     // findUnique method to get account details
     logger.info({
       message: `verifyKeychain in updatePermissions initiated`,
