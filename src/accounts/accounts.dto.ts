@@ -58,9 +58,6 @@ export class UpdateAccountDto {
   email: string;
 
   @IsNotEmpty()
-  password: string;
-
-  @IsNotEmpty()
   firstName: string;
 
   @IsNotEmpty()
@@ -68,6 +65,9 @@ export class UpdateAccountDto {
 
   @IsNotEmpty()
   profilePicture: string;
+
+  @IsString()
+  password?: string;
 }
 
 export class UpdateWalletBalanceDto {

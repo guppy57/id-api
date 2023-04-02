@@ -281,12 +281,6 @@ export class AccountsService {
     let account: any;
     let tempAccount: Account;
 
-    // this version of updating the password is if the user does it in my.kreativeusa.com
-    // this way they are authenticated and do not need a 'password reset code'
-    // it generates new password hash with salt
-    const bpassword: string = await argon2.hash(dto.password);
-    logger.info(`password salted in updateAccount to ${bpassword}`);
-
     // first we check if the username is available
     try {
       // finds the account in the database based on unique email
@@ -337,6 +331,22 @@ export class AccountsService {
       throw new ConflictException('email is already taken');
     }
 
+    // create the update data object
+    const updateData: any = {
+      email: dto.email,
+      username: dto.username,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      profilePicture: dto.profilePicture,
+    };
+
+    // if the client sends a new password, then we salt and add it to the updateData object
+    if (dto.password) {
+      const bpassword: string = await argon2.hash(dto.password);
+      logger.info(`password salted in updateAccount to ${bpassword}`);
+      updateData.bpassword = bpassword;
+    }
+
     try {
       // TODO add email verification flow (if email is different)
       // update account details and returns update
@@ -345,14 +355,7 @@ export class AccountsService {
         where: {
           ksn: req.kreativeAccount.ksn,
         },
-        data: {
-          email: dto.email,
-          username: dto.username,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          profilePicture: dto.profilePicture,
-          bpassword,
-        },
+        data: updateData,
       });
     } catch (error) {
       // handles any prisma errors
@@ -628,7 +631,7 @@ export class AccountsService {
       handlePrismaErrors(error);
     }
 
-    // creates the data for the login notification email
+    // creates the data for the password reset notification email
     const passwordNotificationEmail: PostageDto = {
       toAddress: accountChange.email,
       template: 'password-changed',
