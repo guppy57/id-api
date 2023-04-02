@@ -4,8 +4,8 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException
-} from "@nestjs/common";
+  UnauthorizedException,
+} from '@nestjs/common';
 import { customAlphabet } from 'nanoid';
 import * as argon2 from 'argon2';
 
@@ -142,8 +142,9 @@ export class AccountsService {
     }
 
     // removes sensitive information from account object
-    delete account.bpassword, account.resetCode;
-    logger.info(`info for new account with ${dto.email} removed`);
+    delete account.bpassword;
+    delete account.resetCode;
+    logger.info(`sensitive info for new account with ${dto.email} removed`);
 
     // sets up data for new Keychain with the keychain dto
     const keychainData: KeychainDto = { ksn, aidn: dto.aidn, rememberMe: true };
@@ -222,7 +223,8 @@ export class AccountsService {
     }
 
     // removes sensitive information from account object
-    delete account.bpassword, account.resetCode;
+    delete account.bpassword;
+    delete account.resetCode;
     logger.info(`removed sensitive account info for ${dto.email}`);
 
     // sets up data for new Keychain with the keychain dto
@@ -362,7 +364,9 @@ export class AccountsService {
     }
 
     // delete sensitive information from account object
-    delete account.bpassword, account.resetCode;
+    delete account.bpassword;
+    delete account.resetCode;
+    logger.info(`sensitive information deleted from account object`)
 
     // send all neccessary data back to the client
     const payload: IResponse = {
@@ -474,7 +478,8 @@ export class AccountsService {
       throw new NotFoundException('Account not found');
     } else {
       // removes sensitive information
-      delete account.bpassword, account.resetCode;
+      delete account.bpassword;
+      delete account.resetCode;
       logger.info(`sensitive info for ${ksn} removed`);
 
       // returns account details
