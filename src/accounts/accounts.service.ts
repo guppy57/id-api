@@ -4,8 +4,8 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException
-} from "@nestjs/common";
+  UnauthorizedException,
+} from '@nestjs/common';
 import { customAlphabet } from 'nanoid';
 import * as argon2 from 'argon2';
 
