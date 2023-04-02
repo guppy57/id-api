@@ -70,21 +70,31 @@ export class AuthenticateUserMiddleware implements NestMiddleware {
               });
             } else {
               // checks to see if the AIDN on the keychain is the same AIDN as our application (Kreative ID non-test)
+              // or if the AIDN on the keychain is the same as the one for MyKreative
               // this is checking to see if the user on the client is sending through a keychain that was
               // created when they tried signing into this application
               // parses the environment variable for the HOST_AIDN
               const HOST_AIDN: number = parseInt(process.env.HOST_AIDN);
+              const MYKREATIVE_AIDN: number = parseInt(
+                process.env.MYKREATIVE_AIDN,
+              );
+              const GIVEN_AIDN: number = parseInt(
+                response.data.data.keychain.aidn,
+              );
 
-              if ((response.data.data.keychain.aidn as number) !== HOST_AIDN) {
+              const validAidns: number[] = [HOST_AIDN, MYKREATIVE_AIDN];
+
+              if (!validAidns.includes(GIVEN_AIDN)) {
                 // sends back an UnauthorizedException
                 logger.warn({
                   message: 'authenticate middleware sent 401 error',
-                  hostAidn: HOST_AIDN,
                   givenAidn: response.data.data.keychain.aidn,
+                  validAidns,
                 });
                 res.status(401).send({
                   statusCode: 401,
-                  message: 'keychain.aidn does not match HOST_AIDN',
+                  message:
+                    'keychain.aidn does not match HOST_AIDN or MYKREATIVE_AIDN',
                 });
               } else {
                 const account: any = response.data.data.account;
