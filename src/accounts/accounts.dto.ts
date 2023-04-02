@@ -3,10 +3,11 @@ import {
   IsBoolean,
   IsEmail,
   IsNotEmpty,
-  IsNumber, IsOptional,
+  IsNumber,
+  IsOptional,
   IsString,
-  Min
-} from "class-validator";
+  Min,
+} from 'class-validator';
 
 export class SignupDto {
   @IsNotEmpty()
