@@ -311,6 +311,30 @@ export class AccountsService {
       throw new ConflictException('username is already taken');
     }
 
+    // second, we check if the email is available
+    try {
+      // finds the account in the database based on unique email
+      logger.info(`prisma.account.findUnique initiated for ${dto.email}`);
+      tempAccount = await this.prisma.account.findUnique({
+        where: { email: dto.email },
+      });
+    } catch (error) {
+      // handle any other prisma errors that occur
+      logger.error({
+        message: `prisma.account.findUnique error: ${error} for ${dto.email}`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    if (tempAccount && tempAccount.ksn !== req.kreativeAccount.ksn) {
+      logger.info(
+        `email ${dto.email} is already taken for ${req.kreativeAccount.email}`,
+      );
+      // since there is a conflict we throw this exception with a status code of 409
+      throw new ConflictException('email is already taken');
+    }
+
     try {
       // TODO add email verification flow (if email is different)
       // update account details and returns update
