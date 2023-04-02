@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import {
@@ -19,6 +20,7 @@ import {
   UpdatePermissionsDto,
 } from './accounts.dto';
 import logger from '../../utils/logger';
+import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Controller('accounts')
 export class AccountsController {
@@ -40,9 +42,12 @@ export class AccountsController {
 
   @Post('update')
   @HttpCode(HttpStatus.OK)
-  updateAccount(@Body() dto: UpdateAccountDto) {
+  updateAccount(
+    @Req() req: IAuthenticatedRequest,
+    @Body() dto: UpdateAccountDto,
+  ) {
     logger.info({ message: `POST /accounts/update initiated`, body: dto });
-    return this.accountsService.updateAccount(dto);
+    return this.accountsService.updateAccount(req, dto);
   }
 
   @Post('update/permissions')
