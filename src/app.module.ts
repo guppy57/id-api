@@ -15,7 +15,7 @@ import '@sentry/tracing';
 import { SentryModule } from './sentry/sentry.module';
 import { AuthenticateUserMiddleware } from '../middleware/authenticateUser';
 import { ApplicationsController } from './applications/applications.controller';
-import { AccountsController} from "./accounts/accounts.controller";
+import { AccountsController } from './accounts/accounts.controller';
 import { PhotosModule } from './photos/photos.module';
 
 @Module({
