@@ -16,6 +16,7 @@ import { SentryModule } from './sentry/sentry.module';
 import { AuthenticateUserMiddleware } from '../middleware/authenticateUser';
 import { ApplicationsController } from './applications/applications.controller';
 import { AccountsController} from "./accounts/accounts.controller";
+import { PhotosModule } from './photos/photos.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AccountsController} from "./accounts/accounts.controller";
     PrismaModule,
     PostageModule,
     SentryModule,
+    PhotosModule,
   ],
   controllers: [AppController],
   providers: [],
