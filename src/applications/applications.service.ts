@@ -7,7 +7,7 @@ import { Request } from 'express';
 import { Application, Keychain } from '@prisma/client';
 import { customAlphabet, nanoid } from 'nanoid';
 import { PrismaService } from '../prisma/prisma.service';
-import { IResponse } from 'types/IResponse';
+import { IResponse } from '../../types/IResponse';
 import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
 import {
   NewApplicationDto,
