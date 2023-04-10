@@ -35,7 +35,42 @@ export class PhotosService {
     return payload;
   }
 
-  async findAllForUser(req: IAuthenticatedRequest): Promise<IResponse> {}
+  async findAllForUser(
+    req: IAuthenticatedRequest,
+    category: string,
+  ): Promise<IResponse> {
+    const ksn: number = parseInt(req.kreativeAccount.ksn as string);
+    const _category: string = category !== 'all' ? category : undefined;
+    let photos: Photo[];
+
+    try {
+      logger.info(`prisma.photo.findMany initiated for ${ksn}`);
+      photos = await this.prisma.photo.findMany({
+        where: {
+          category: _category,
+          ksn,
+        },
+      });
+    } catch (error) {
+      logger.error({
+        message: `prisma.photo.findMany failed for ${ksn} & ${category}: ${error.message}`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    const payload: IResponse = {
+      statusCode: 200,
+      message: 'Found all photos for user',
+      data: { photos },
+    };
+
+    logger.info({
+      message: 'photos.service.findAllForUser succeeded',
+      payload,
+    });
+    return payload;
+  }
 
   async uploadPhoto(req: IAuthenticatedRequest): Promise<IResponse> {}
 }
