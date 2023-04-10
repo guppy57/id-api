@@ -1,4 +1,12 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { PhotosService } from './photos.service';
 import { IResponse } from '../../types/IResponse';
 import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
@@ -17,9 +25,12 @@ export class PhotosController {
 
   @Get('user')
   @HttpCode(HttpStatus.OK)
-  async findAllAsUser(@Req() req: IAuthenticatedRequest): Promise<IResponse> {
+  async findAllAsUser(
+    @Req() req: IAuthenticatedRequest,
+    @Query('category') category: string,
+  ): Promise<IResponse> {
     logger.info('GET /photos/user initiated');
-    return this.photosService.findAllForUser(req);
+    return this.photosService.findAllForUser(req, category);
   }
 
   @Post('')
