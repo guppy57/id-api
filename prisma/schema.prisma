@@ -28,6 +28,7 @@ model Account {
   permissions      String[]
   keychains        Keychain[]
   transactions     Transaction[]
+  Photos           Photos[]
 }
 
 model Transaction {
@@ -67,4 +68,14 @@ model Application {
   iconUrl      String        @default("#")
   keychains    Keychain[]
   transactions Transaction[]
+}
+
+model Photos {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  filename  String
+  url       String
+  Account   Account? @relation(fields: [ksn], references: [ksn])
+  ksn       Int?
 }
