@@ -6,11 +6,14 @@ import {
   Post,
   Query,
   Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PhotosService } from './photos.service';
 import { IResponse } from '../../types/IResponse';
 import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import logger from '../../utils/logger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('photos')
 export class PhotosController {
@@ -35,8 +38,12 @@ export class PhotosController {
 
   @Post('')
   @HttpCode(HttpStatus.CREATED)
-  async uploadPhoto(@Req() req: IAuthenticatedRequest): Promise<IResponse> {
+  @UseInterceptors(FileInterceptor('photo'))
+  async uploadPhoto(
+    @Req() req: IAuthenticatedRequest,
+    @UploadedFile() photo: Express.Multer.File,
+  ): Promise<IResponse> {
     logger.info('POST /photos initiated');
-    return this.photosService.uploadPhoto(req);
+    return this.photosService.uploadPhoto(req, photo);
   }
 }
