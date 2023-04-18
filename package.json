@@ -33,6 +33,7 @@
     "@sentry/node": "^7.31.1",
     "@sentry/tracing": "^7.31.1",
     "@types/multer": "^1.4.7",
+    "@types/sharp": "^0.31.1",
     "argon2": "^0.30.3",
     "aws-sdk": "^2.1360.0",
     "axios": "^1.2.5",
@@ -49,6 +50,7 @@
     "newrelic": "^9.10.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
+    "sharp": "^0.32.0",
     "winston": "^3.8.2"
   },
   "devDependencies": {
