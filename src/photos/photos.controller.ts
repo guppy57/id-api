@@ -53,6 +53,8 @@ export class PhotosController {
   ): Promise<IResponse> {
     logger.info(`POST /photos/${category} initiated`);
 
+    console.log(photo);
+
     // these are all the potential categories that a photo can be uploaded to
     // if we need to add more categories, we need to manually change the code here.
     // eventually we can have an API to manage photo categories, but for now this is fine
