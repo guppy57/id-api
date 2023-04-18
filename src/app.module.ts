@@ -14,7 +14,6 @@ import '@sentry/tracing';
 
 import { SentryModule } from './sentry/sentry.module';
 import { AuthenticateUserMiddleware } from '../middleware/authenticateUser';
-import { AccountsController } from './accounts/accounts.controller';
 import { PhotosModule } from './photos/photos.module';
 
 @Module({
@@ -45,34 +44,5 @@ export class AppModule implements NestModule {
       path: '*',
       method: RequestMethod.ALL,
     });
-    consumer
-      .apply(AuthenticateUserMiddleware)
-      .exclude(
-        {
-          path: 'v1/accounts/signin',
-          method: RequestMethod.POST,
-        },
-        {
-          path: 'v1/accounts/signup',
-          method: RequestMethod.POST,
-        },
-        {
-          path: 'v1/accounts/:ksn',
-          method: RequestMethod.GET,
-        },
-        {
-          path: 'v1/accounts/resetCode/send',
-          method: RequestMethod.POST,
-        },
-        {
-          path: 'v1/accounts/resetCode/verify',
-          method: RequestMethod.POST,
-        },
-        {
-          path: 'v1/accounts/:ksn/resetPassword',
-          method: RequestMethod.POST,
-        },
-      )
-      .forRoutes(AccountsController);
   }
 }

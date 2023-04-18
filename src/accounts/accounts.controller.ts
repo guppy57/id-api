@@ -21,6 +21,7 @@ import {
 } from './accounts.dto';
 import logger from '../../utils/logger';
 import { IResponse } from '../../types/IResponse';
+import { UserAuthGuard } from '../../guards/userAuth.guard';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Controller('accounts')
@@ -43,6 +44,7 @@ export class AccountsController {
 
   @Post('update')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
   updateAccount(
     @Req() req: IAuthenticatedRequest,
     @Body() dto: UpdateAccountDto,
@@ -53,6 +55,7 @@ export class AccountsController {
 
   @Post('update/permissions')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
   updatePermissions(@Body() dto: UpdatePermissionsDto): Promise<IResponse> {
     logger.info({
       message: `POST /accounts/update/permissions initiated`,
