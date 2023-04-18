@@ -10,9 +10,9 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
-
 import { IResponse } from 'types/IResponse';
 import {
   NewApplicationDto,
@@ -20,6 +20,7 @@ import {
   VerifyAppchainDto,
 } from './applications.dto';
 import { ApplicationsService } from './applications.service';
+import { UserAuthGuard } from '../../guards/userAuth.guard';
 import logger from '../../utils/logger';
 
 @Controller('applications')
@@ -28,6 +29,7 @@ export class ApplicationsController {
 
   @Post('')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async createApplication(@Body() dto: NewApplicationDto): Promise<IResponse> {
     logger.info({ message: `POST /applications initiated`, body: dto });
     return this.applicationsService.createApplication(dto);
@@ -35,6 +37,7 @@ export class ApplicationsController {
 
   @Get('')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async getAllApplications(): Promise<IResponse> {
     logger.info(`GET /applications initiated`);
     return this.applicationsService.getAllApplications();
@@ -53,6 +56,7 @@ export class ApplicationsController {
 
   @Post(':aidn')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async updateApplication(
     @Param('aidn', ParseIntPipe) aidn: number,
     @Body() dto: UpdateApplicationDto,
@@ -63,6 +67,7 @@ export class ApplicationsController {
 
   @Delete(':aidn')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async deleteApplication(
     @Param('aidn', ParseIntPipe) aidn: number,
   ): Promise<IResponse> {

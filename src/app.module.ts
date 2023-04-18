@@ -14,7 +14,6 @@ import '@sentry/tracing';
 
 import { SentryModule } from './sentry/sentry.module';
 import { AuthenticateUserMiddleware } from '../middleware/authenticateUser';
-import { ApplicationsController } from './applications/applications.controller';
 import { AccountsController } from './accounts/accounts.controller';
 import { PhotosModule } from './photos/photos.module';
 
@@ -42,7 +41,6 @@ import { PhotosModule } from './photos/photos.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    // sentry specific middlware
     consumer.apply(Sentry.Handlers.requestHandler()).forRoutes({
       path: '*',
       method: RequestMethod.ALL,
@@ -50,11 +48,6 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthenticateUserMiddleware)
       .exclude(
-        { path: 'v1/applications/:aidn', method: RequestMethod.GET },
-        {
-          path: 'v1/applications/:aidn/appchain/verify',
-          method: RequestMethod.GET,
-        },
         {
           path: 'v1/accounts/signin',
           method: RequestMethod.POST,
@@ -80,6 +73,6 @@ export class AppModule implements NestModule {
           method: RequestMethod.POST,
         },
       )
-      .forRoutes(ApplicationsController, AccountsController);
+      .forRoutes(AccountsController);
   }
 }
