@@ -9,8 +9,10 @@ import {
   Query,
   Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { UserAuthGuard } from '../../guards/userAuth.guard';
 import { PhotosService } from './photos.service';
 import { IResponse } from '../../types/IResponse';
 import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
@@ -23,6 +25,7 @@ export class PhotosController {
 
   @Get('admin')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async findAllAsAdmin(): Promise<IResponse> {
     logger.info('GET /photos/admin initiated');
     return this.photosService.findAll();
@@ -30,6 +33,7 @@ export class PhotosController {
 
   @Get('user')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
   async findAllAsUser(
     @Req() req: IAuthenticatedRequest,
     @Query('category') category: string,
@@ -41,6 +45,7 @@ export class PhotosController {
   @Post(':category')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('photo'))
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
   async uploadPhoto(
     @Req() req: IAuthenticatedRequest,
     @UploadedFile() photo: Express.Multer.File,
