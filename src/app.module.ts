@@ -15,8 +15,9 @@ import '@sentry/tracing';
 import { SentryModule } from './sentry/sentry.module';
 import { AuthenticateUserMiddleware } from '../middleware/authenticateUser';
 import { ApplicationsController } from './applications/applications.controller';
-import { AccountsController} from "./accounts/accounts.controller";
+import { AccountsController } from './accounts/accounts.controller';
 import { PhotosModule } from './photos/photos.module';
+import { PhotosController } from './photos/photos.controller';
 
 @Module({
   imports: [
@@ -80,6 +81,6 @@ export class AppModule implements NestModule {
           method: RequestMethod.POST,
         },
       )
-      .forRoutes(ApplicationsController, AccountsController);
+      .forRoutes(ApplicationsController, AccountsController, PhotosController);
   }
 }
