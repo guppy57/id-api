@@ -10,6 +10,8 @@ import axios, { AxiosResponse } from 'axios';
 import logger from '../utils/logger';
 import { IAuthenticatedRequest } from '../types/IAuthenticatedRequest';
 
+const PORT = process.env.PORT || 3000;
+
 const AIDNs: number[] = [
   parseInt(process.env.HOST_AIDN),
   parseInt(process.env.MYKREATIVE_AIDN),
@@ -44,7 +46,7 @@ export class UserAuthGuard implements CanActivate {
 
     try {
       axiosResponse = await axios.post(
-        `http://localhost:3000/v1/keychains/verify`,
+        `http://localhost:${PORT}/v1/keychains/verify`,
         {
           key,
           aidn,
