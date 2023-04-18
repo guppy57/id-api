@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import {
