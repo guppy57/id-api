@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Photo } from '@prisma/client';
 import { S3 } from 'aws-sdk';
+import * as sharp from 'sharp';
 import { PrismaService } from '../prisma/prisma.service';
 import { IResponse } from '../../types/IResponse';
 import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
@@ -89,6 +90,19 @@ export class PhotosService {
     const ksn = req.kreativeAccount.ksn;
     let uploadResult: S3.ManagedUpload.SendData;
     let uploadedPhoto: Photo;
+    let optimizedImage: Buffer;
+
+    // optimize the image using sharp based on photo type
+
+    if (category === 'avatar') {
+      optimizedImage = await sharp(photo.buffer)
+        .resize({ width: 300, height: 300, fit: 'cover' })
+        .toBuffer();
+    } else {
+      optimizedImage = await sharp(photo.buffer)
+        .resize({ width: 800 })
+        .toBuffer();
+    }
 
     try {
       uploadResult = await s3
@@ -97,7 +111,7 @@ export class PhotosService {
           Key: `kreative_id/${category}/${Date.now()}_${ksn}_${
             photo.originalname
           }`,
-          Body: photo.buffer,
+          Body: optimizedImage,
         })
         .promise();
     } catch (error) {
