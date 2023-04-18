@@ -11,9 +11,7 @@ import { PostageModule } from './postage/postage.module';
 import { AppController } from './app.controller';
 import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
-
 import { SentryModule } from './sentry/sentry.module';
-import { AuthenticateUserMiddleware } from '../middleware/authenticateUser';
 import { PhotosModule } from './photos/photos.module';
 
 @Module({
