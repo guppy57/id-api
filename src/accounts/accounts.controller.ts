@@ -20,6 +20,7 @@ import {
   UpdatePermissionsDto,
 } from './accounts.dto';
 import logger from '../../utils/logger';
+import { IResponse } from '../../types/IResponse';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Controller('accounts')
@@ -28,14 +29,14 @@ export class AccountsController {
 
   @Post('signup')
   @HttpCode(HttpStatus.OK)
-  signup(@Body() dto: SignupDto) {
+  signup(@Body() dto: SignupDto): Promise<IResponse> {
     logger.info({ message: `POST /accounts/signup initiated`, body: dto });
     return this.accountsService.signup(dto);
   }
 
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  signin(@Body() dto: SigninDto) {
+  signin(@Body() dto: SigninDto): Promise<IResponse> {
     logger.info({ message: `POST /accounts/signin initiated`, body: dto });
     return this.accountsService.signin(dto);
   }
@@ -45,14 +46,14 @@ export class AccountsController {
   updateAccount(
     @Req() req: IAuthenticatedRequest,
     @Body() dto: UpdateAccountDto,
-  ) {
+  ): Promise<IResponse> {
     logger.info({ message: `POST /accounts/update initiated`, body: dto });
     return this.accountsService.updateAccount(req, dto);
   }
 
   @Post('update/permissions')
   @HttpCode(HttpStatus.OK)
-  updatePermissions(@Body() dto: UpdatePermissionsDto) {
+  updatePermissions(@Body() dto: UpdatePermissionsDto): Promise<IResponse> {
     logger.info({
       message: `POST /accounts/update/permissions initiated`,
       body: dto,
@@ -62,14 +63,14 @@ export class AccountsController {
 
   @Get(':ksn')
   @HttpCode(HttpStatus.OK)
-  getAccount(@Param('ksn', ParseIntPipe) ksn: number) {
+  getAccount(@Param('ksn', ParseIntPipe) ksn: number): Promise<IResponse> {
     logger.info(`GET /accounts/${ksn} initiated`);
     return this.accountsService.getAccount(ksn);
   }
 
   @Post('resetCode/send')
   @HttpCode(HttpStatus.OK)
-  async sendResetCode(@Body() dto: SendCodeDto) {
+  async sendResetCode(@Body() dto: SendCodeDto): Promise<IResponse> {
     logger.info({
       message: `POST /accounts/resetCode/send initiated`,
       body: dto,
@@ -82,7 +83,7 @@ export class AccountsController {
   async verifyResetCode(
     @Param('ksn', ParseIntPipe) ksn: number,
     @Body() dto: VerifyCodeDto,
-  ) {
+  ): Promise<IResponse> {
     logger.info({
       message: `POST /accounts/${ksn}/resetCode/verify initiated`,
       body: dto,
