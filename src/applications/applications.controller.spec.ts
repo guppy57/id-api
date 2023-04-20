@@ -1,13 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
-import { IResponse } from 'types/IResponse';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApplicationsController } from './applications.controller';
-import { NewApplicationDto } from './applications.dto';
 import { ApplicationsService } from './applications.service';
-
-const API_ENDPOINT = '/api/v1/applications';
 
 describe('Applications Controller', () => {
   let controller: ApplicationsController;
