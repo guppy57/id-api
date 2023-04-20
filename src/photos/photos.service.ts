@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Photo } from '@prisma/client';
 import { S3 } from 'aws-sdk';
 import * as sharp from 'sharp';
@@ -208,6 +213,66 @@ export class PhotosService {
       message: 'photos.service.findAllForUser succeeded',
       payload,
     });
+    return payload;
+  }
+
+  async deletePhoto(
+    req: IAuthenticatedRequest,
+    photoId: number,
+  ): Promise<IResponse> {
+    const ksn: number = parseInt(req.kreativeAccount.ksn as string);
+    let photo: Photo;
+
+    try {
+      logger.info(`prisma.photo.findUnique initiated for ${ksn}`);
+      photo = await this.prisma.photo.findUnique({
+        where: {
+          id: photoId,
+        },
+      });
+    } catch (error) {
+      logger.error({
+        message: `prisma.photo.findUnique failed for ${ksn} & ${photoId}: ${error.message}`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    if (!photo) {
+      logger.error({
+        message: `prisma.photo.findUnique failed for ${ksn} & ${photoId}: Photo not found`,
+      });
+      throw new NotFoundException('Photo not found');
+    }
+
+    if (photo.ksn !== ksn) {
+      logger.error({
+        message: `prisma.photo.findUnique failed for ${ksn} & ${photoId}: Photo does not belong to user`,
+      });
+      throw new ForbiddenException('Photo does not belong to user');
+    }
+
+    try {
+      logger.info(`prisma.photo.delete initiated for ${ksn}`);
+      await this.prisma.photo.delete({
+        where: {
+          id: photoId,
+        },
+      });
+    } catch (error) {
+      logger.error({
+        message: `prisma.photo.delete failed for ${ksn} & ${photoId}: ${error.message}`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    const payload: IResponse = {
+      statusCode: 200,
+      message: 'Photo deleted successfully',
+    };
+
+    logger.info({ message: 'photos.service.deletePhoto succeeded', payload });
     return payload;
   }
 }

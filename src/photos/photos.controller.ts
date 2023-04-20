@@ -1,8 +1,10 @@
 import {
   BadRequestException,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   Req,
@@ -64,5 +66,15 @@ export class PhotosController {
     }
 
     return this.photosService.uploadPhotoForAPI(req, photo, category);
+  }
+
+  @Delete(':photoId')
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  async deletePhoto(
+    @Req() req: IAuthenticatedRequest,
+    @Param('photoId', ParseIntPipe) photoId: number,
+  ): Promise<IResponse> {
+    logger.info(`DELETE /photos/${photoId} initiated`);
+    return this.photosService.deletePhoto(req, photoId);
   }
 }
