@@ -169,11 +169,11 @@ export class KeychainsService {
         // handles all prisma errors
         logger.error({ message: `prisma.keychain.update failed`, error });
         handlePrismaErrors(error);
-      } finally {
-        // throw error to kill the process and return failed verification
-        logger.error(`UnauthorizedException thrown since keychain is expired`);
-        throw new UnauthorizedException('keychain has expired from payload');
       }
+
+      // throw error to kill the process and return failed verification
+      logger.error(`UnauthorizedException thrown since keychain is expired`);
+      throw new UnauthorizedException('keychain has expired from payload');
     }
 
     // verify the aidn's match
@@ -188,7 +188,8 @@ export class KeychainsService {
     // it doesn't seem like there would be any reason to send the key back to the client
     // as they already have a copy of it that IS valid and not expired
     logger.info(`sensitive info for keychain being deleted`);
-    delete keychain.key, keychain.expired;
+    delete keychain.key;
+    delete keychain.expired;
 
     // finds the account details for user attached to the keychain
     // this method should NOT throw any errors, as the only possible ones could be some sort of
