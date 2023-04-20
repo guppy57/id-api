@@ -5,8 +5,6 @@ import {
   Post,
   Param,
   ParseIntPipe,
-  HttpCode,
-  HttpStatus,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -30,21 +28,18 @@ export class AccountsController {
   constructor(private accountsService: AccountsService) {}
 
   @Post('signup')
-  @HttpCode(HttpStatus.OK)
   signup(@Body() dto: SignupDto): Promise<IResponse> {
     logger.info({ message: `POST /accounts/signup initiated`, body: dto });
     return this.accountsService.signup(dto);
   }
 
   @Post('signin')
-  @HttpCode(HttpStatus.OK)
   signin(@Body() dto: SigninDto): Promise<IResponse> {
     logger.info({ message: `POST /accounts/signin initiated`, body: dto });
     return this.accountsService.signin(dto);
   }
 
   @Post('update')
-  @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
   updateAccount(
     @Req() req: IAuthenticatedRequest,
@@ -55,7 +50,6 @@ export class AccountsController {
   }
 
   @Post('update/permissions')
-  @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
   updatePermissions(@Body() dto: UpdatePermissionsDto): Promise<IResponse> {
     logger.info({
@@ -66,14 +60,12 @@ export class AccountsController {
   }
 
   @Get(':ksn')
-  @HttpCode(HttpStatus.OK)
   getAccount(@Param('ksn', ParseIntPipe) ksn: number): Promise<IResponse> {
     logger.info(`GET /accounts/${ksn} initiated`);
     return this.accountsService.getAccount(ksn);
   }
 
   @Post('resetCode/send')
-  @HttpCode(HttpStatus.OK)
   async sendResetCode(@Body() dto: SendCodeDto): Promise<IResponse> {
     logger.info({
       message: `POST /accounts/resetCode/send initiated`,
@@ -83,7 +75,6 @@ export class AccountsController {
   }
 
   @Post(':ksn/resetCode/verify')
-  @HttpCode(HttpStatus.OK)
   async verifyResetCode(
     @Param('ksn', ParseIntPipe) ksn: number,
     @Body() dto: VerifyCodeDto,
@@ -96,7 +87,6 @@ export class AccountsController {
   }
 
   @Post(':ksn/resetPassword')
-  @HttpCode(HttpStatus.OK)
   async resetPassword(
     @Param('ksn', ParseIntPipe) ksn: number,
     @Body() dto: ResetPasswordDto,

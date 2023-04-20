@@ -3,8 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -28,7 +26,6 @@ export class ApplicationsController {
   constructor(private applicationsService: ApplicationsService) {}
 
   @Post('')
-  @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async createApplication(@Body() dto: NewApplicationDto): Promise<IResponse> {
     logger.info({ message: `POST /applications initiated`, body: dto });
@@ -36,7 +33,6 @@ export class ApplicationsController {
   }
 
   @Get('')
-  @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async getAllApplications(): Promise<IResponse> {
     logger.info(`GET /applications initiated`);
@@ -44,7 +40,6 @@ export class ApplicationsController {
   }
 
   @Get(':aidn')
-  @HttpCode(HttpStatus.OK)
   async getApplication(
     @Req() req: Request,
     @Param('aidn', ParseIntPipe) aidn: number,
@@ -55,7 +50,6 @@ export class ApplicationsController {
   }
 
   @Post(':aidn')
-  @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async updateApplication(
     @Param('aidn', ParseIntPipe) aidn: number,
@@ -66,7 +60,6 @@ export class ApplicationsController {
   }
 
   @Delete(':aidn')
-  @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async deleteApplication(
     @Param('aidn', ParseIntPipe) aidn: number,
@@ -76,7 +69,6 @@ export class ApplicationsController {
   }
 
   @Post(':aidn/appchain/verify')
-  @HttpCode(HttpStatus.OK)
   async verifyAppchain(
     @Param('aidn', ParseIntPipe) aidn: number,
     @Body() dto: VerifyAppchainDto,

@@ -2,8 +2,6 @@ import {
   BadRequestException,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   Post,
   Query,
@@ -24,7 +22,6 @@ export class PhotosController {
   constructor(private readonly photosService: PhotosService) {}
 
   @Get('admin')
-  @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async findAllAsAdmin(): Promise<IResponse> {
     logger.info('GET /photos/admin initiated');
@@ -32,7 +29,6 @@ export class PhotosController {
   }
 
   @Get('user')
-  @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
   async findAllAsUser(
     @Req() req: IAuthenticatedRequest,
@@ -43,7 +39,6 @@ export class PhotosController {
   }
 
   @Post(':category')
-  @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('photo'))
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
   async uploadPhoto(

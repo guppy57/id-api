@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -22,14 +20,12 @@ export class TransactionsController {
   // we could also just authenticate the applications that are making calls to the transactions API
 
   @Post('')
-  @HttpCode(HttpStatus.OK)
   async createTransaction(@Body() dto: CreateTransactionDto) {
     logger.info({ message: `POST /transactions initiated`, body: dto });
     return this.transactionsService.createTransaction(dto);
   }
 
   @Get(':ksn')
-  @HttpCode(HttpStatus.OK)
   async getTransactionsForAccount(@Param('ksn', ParseIntPipe) ksn: number) {
     logger.info(`GET /transactions/${ksn} initiated`);
     return this.transactionsService.getTransactionsByAccount(ksn);
