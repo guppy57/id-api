@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { KeychainsModule } from '../keychains/keychains.module';
 import { PostageModule } from '../postage/postage.module';
 import { PrismaModule } from '../prisma/prisma.module';
+import { PhotosModule } from '../photos/photos.module';
 import { AccountsService } from './accounts.service';
 
 describe('Accounts Service', () => {
@@ -10,7 +11,7 @@ describe('Accounts Service', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [AccountsService],
-      imports: [KeychainsModule, PostageModule, PrismaModule],
+      imports: [KeychainsModule, PostageModule, PrismaModule, PhotosModule],
     }).compile();
 
     service = module.get<AccountsService>(AccountsService);

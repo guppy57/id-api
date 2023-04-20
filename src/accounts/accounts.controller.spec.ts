@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { KeychainsService } from '../keychains/keychains.service';
 import { PostageService } from '../postage/postage.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { PhotosService } from '../photos/photos.service';
 import { AccountsController } from './accounts.controller';
 import { AccountsService } from './accounts.service';
 
@@ -16,6 +17,7 @@ describe('Accounts Controller', () => {
         PostageService,
         PrismaService,
         KeychainsService,
+        PhotosService,
       ],
     }).compile();
 

@@ -25,6 +25,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
 import { KeychainsService } from '../keychains/keychains.service';
 import { PostageService } from '../postage/postage.service';
+import { PhotosService } from '../photos/photos.service';
 import { KeychainDto } from '../keychains/keychains.dto';
 import { PostageDto } from '../postage/postage.dto';
 import logger from '../../utils/logger';
@@ -40,6 +41,9 @@ export class AccountsService {
 
   @Inject(KeychainsService)
   private readonly keychains: KeychainsService;
+
+  @Inject(PhotosService)
+  private readonly photos: PhotosService;
 
   // creates a new, unique kreative service number
   async generateKSN(): Promise<number> {
@@ -118,12 +122,17 @@ export class AccountsService {
     const bpassword: string = await argon2.hash(dto.password);
     logger.info(`new account password salted to ${bpassword}`);
 
+    // add the appropriate profile picture for the user
+    const firstLetter = dto.firstName.charAt(0).toUpperCase();
+    const photoUrl = `https://cdn.kreativeusa.com/kreative_id/letter_avatars/${firstLetter}.png`;
+
     try {
       // create the new user in prisma
       logger.info(`prisma.account.create initiated with ${dto.email}`);
       account = await this.prisma.account.create({
         data: {
           permissions: ['KREATIVE_ID_USER'],
+          profilePicture: photoUrl,
           email: dto.email,
           firstName: dto.firstName,
           lastName: dto.lastName,
@@ -153,6 +162,14 @@ export class AccountsService {
     logger.info(`createKeychain in signup initiated with ${dto.email}`);
     const keychain: Keychain = await this.keychains.createKeychain(
       keychainData,
+    );
+
+    // adds a new photo for the user with the photos API that matches their profile picture
+    await this.photos.uploadPhotoFromUrl(
+      ksn,
+      photoUrl,
+      'avatar',
+      `${firstLetter}.png`,
     );
 
     // creates the data for the new welcome email

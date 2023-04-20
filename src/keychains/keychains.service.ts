@@ -129,7 +129,7 @@ export class KeychainsService {
 
     if (keychain === null) {
       // handles the case where the keychain itself is not found
-      // this could be throw an attack or an incorrectly typed in key
+      // this could be through an attack or an incorrectly typed in key
       logger.error(`keychain not found in verify keychain`);
       throw new NotFoundException('keychain not found');
     }
