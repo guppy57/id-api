@@ -68,6 +68,6 @@ export class PhotosController {
       );
     }
 
-    return this.photosService.uploadPhoto(req, photo, category);
+    return this.photosService.uploadPhotoForAPI(req, photo, category);
   }
 }
