@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TransactionsController } from './transactions.controller';
 import { TransactionsService } from './transactions.service';
 import { KeychainsService } from '../keychains/keychains.service';
+import { PhotosService } from '../photos/photos.service';
 
 describe('Transactions Controller', () => {
   let controller: TransactionsController;
@@ -18,6 +19,7 @@ describe('Transactions Controller', () => {
         AccountsService,
         PostageService,
         KeychainsService,
+        PhotosService,
       ],
     }).compile();
 
