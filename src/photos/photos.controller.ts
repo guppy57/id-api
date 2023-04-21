@@ -2,8 +2,10 @@ import {
   BadRequestException,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   Param,
+  ParseFilePipe,
   ParseIntPipe,
   Post,
   Query,
@@ -45,7 +47,14 @@ export class PhotosController {
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
   async uploadPhoto(
     @Req() req: IAuthenticatedRequest,
-    @UploadedFile() photo: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp)$/ }),
+        ],
+      }),
+    )
+    photo: Express.Multer.File,
     @Param('category') category: string,
   ): Promise<IResponse> {
     logger.info(`POST /photos/${category} initiated`);
