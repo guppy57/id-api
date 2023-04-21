@@ -17,6 +17,7 @@ import {
   ResetPasswordDto,
   SendCodeDto,
   UpdatePermissionsDto,
+  UpdateAvatarDto,
 } from './accounts.dto';
 import logger from '../../utils/logger';
 import { IResponse } from '../../types/IResponse';
@@ -47,6 +48,19 @@ export class AccountsController {
   ): Promise<IResponse> {
     logger.info({ message: `POST /accounts/update initiated`, body: dto });
     return this.accountsService.updateAccount(req, dto);
+  }
+
+  @Post('update/avatar')
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  updateAvatar(
+    @Req() req: IAuthenticatedRequest,
+    @Body() dto: UpdateAvatarDto,
+  ): Promise<IResponse> {
+    logger.info({
+      message: `POST /accounts/update/avatar initiated`,
+      body: dto,
+    });
+    return this.accountsService.updateAvatar(req, dto);
   }
 
   @Post('update/permissions')

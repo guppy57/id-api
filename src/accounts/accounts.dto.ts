@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUrl,
   Min,
 } from 'class-validator';
 
@@ -102,6 +103,12 @@ export class UpdatePermissionsDto {
   @IsNotEmpty()
   @IsArray()
   newPermissions: Array<string>;
+}
+
+export class UpdateAvatarDto {
+  @IsNotEmpty()
+  @IsUrl()
+  photoUrl: string;
 }
 
 export class SendCodeDto {

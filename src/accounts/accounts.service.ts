@@ -19,6 +19,7 @@ import {
   ResetPasswordDto,
   SendCodeDto,
   UpdatePermissionsDto,
+  UpdateAvatarDto,
 } from './accounts.dto';
 import { IResponse } from '../../types/IResponse';
 import { PrismaService } from '../prisma/prisma.service';
@@ -397,6 +398,46 @@ export class AccountsService {
     };
 
     logger.info({ message: `updateAccount succeeded`, payload });
+    return payload;
+  }
+
+  // changes the profilePicture of an account using a new photoUrl
+  async updateAvatar(
+    req: IAuthenticatedRequest,
+    dto: UpdateAvatarDto,
+  ): Promise<IResponse> {
+    let account: any;
+
+    try {
+      // update account details and returns update
+      logger.info(`prisma.account.update initiated in updateAvatar`);
+      account = await this.prisma.account.update({
+        where: {
+          ksn: req.kreativeAccount.ksn,
+        },
+        data: {
+          profilePicture: dto.photoUrl,
+        },
+      });
+    } catch (error) {
+      // handles any prisma errors
+      logger.error({
+        message: `prisma.account.update in updateAvatar`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    logger.info(`sensitive information deleted from account object`);
+
+    // send all necessary data back to the client
+    const payload: IResponse = {
+      statusCode: 200,
+      message: 'Account avatar updated',
+      data: { profilePicture: account.profilePicture },
+    };
+
+    logger.info({ message: `updateAvatar succeeded`, payload });
     return payload;
   }
 
