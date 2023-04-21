@@ -107,7 +107,7 @@ const passwordChanged = `
                         <img src="https://cdn.kreativeusa.com/fed/kreative-logo-gray-variant.png" width="100" alt="Kreative logo in gray variant" style="border: 0; margin-bottom: 16px; max-width: 100%; vertical-align: middle">
                       </a>
                       <p style="margin: 0; margin-bottom: 16px; text-transform: uppercase">
-                        Powered by Startnet. Radical Starts Here.
+                        Powered by Starnet. Radical Starts Here.
                       </p>
                       <p style="cursor: default">
                         <a href="https://kreativeusa.com?source=reset-code-email" class="hover-text-decoration-underline" style="text-decoration: none; color: #4338ca">Visit Kreative</a>
