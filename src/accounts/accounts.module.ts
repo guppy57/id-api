@@ -4,9 +4,10 @@ import { PostageModule } from '../postage/postage.module';
 import { PhotosModule } from '../photos/photos.module';
 import { AccountsController } from './accounts.controller';
 import { AccountsService } from './accounts.service';
+import { ApplicationsModule } from '../applications/applications.module';
 
 @Module({
-  imports: [KeychainsModule, PostageModule, PhotosModule],
+  imports: [KeychainsModule, PostageModule, PhotosModule, ApplicationsModule],
   controllers: [AccountsController],
   providers: [AccountsService],
   exports: [AccountsService],
