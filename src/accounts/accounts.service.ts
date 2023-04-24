@@ -245,10 +245,30 @@ export class AccountsService {
       throw new UnauthorizedException('password mismatch');
     }
 
-    // removes sensitive information from account object
     delete account.bpassword;
     delete account.resetCode;
     logger.info(`removed sensitive account info for ${dto.email}`);
+
+    const basePermission = await this.applications.getBasePermission(dto.aidn);
+
+    if (!account.permissions.includes(basePermission)) {
+      try {
+        // create the new user in prisma
+        logger.info(`prisma.account.update initiated with ${dto.email}`);
+        account = await this.prisma.account.update({
+          where: { email: dto.email },
+          data: {
+            permissions: [...account.permissions, basePermission],
+          },
+        });
+      } catch (error) {
+        logger.error({
+          message: `prisma.account.update for ${dto.email} failed`,
+          error,
+        });
+        handlePrismaErrors(error);
+      }
+    }
 
     // sets up data for new Keychain with the keychain dto
     const keychainData: KeychainDto = {
