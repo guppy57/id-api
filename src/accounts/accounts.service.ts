@@ -27,10 +27,10 @@ import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
 import { KeychainsService } from '../keychains/keychains.service';
 import { PostageService } from '../postage/postage.service';
 import { PhotosService } from '../photos/photos.service';
+import { ApplicationsService } from '../applications/applications.service';
 import { KeychainDto } from '../keychains/keychains.dto';
 import { PostageDto } from '../postage/postage.dto';
 import logger from '../../utils/logger';
-import { handleKeychainCopies } from '../../utils/handleKeychainCopies';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Injectable({})
@@ -45,6 +45,9 @@ export class AccountsService {
 
   @Inject(PhotosService)
   private readonly photos: PhotosService;
+
+  @Inject(ApplicationsService)
+  private readonly applications: ApplicationsService;
 
   // creates a new, unique kreative service number
   async generateKSN(): Promise<number> {
@@ -127,12 +130,14 @@ export class AccountsService {
     const firstLetter = dto.firstName.charAt(0).toUpperCase();
     const photoUrl = `https://cdn.kreativeusa.com/kreative_id/letter_avatars/${firstLetter}.png`;
 
+    const basePermission = await this.applications.getBasePermission(dto.aidn);
+
     try {
       // create the new user in prisma
       logger.info(`prisma.account.create initiated with ${dto.email}`);
       account = await this.prisma.account.create({
         data: {
-          permissions: ['KREATIVE_ID_USER'],
+          permissions: ['KREATIVE_ID_USER', basePermission],
           profilePicture: photoUrl,
           email: dto.email,
           firstName: dto.firstName,
@@ -252,11 +257,6 @@ export class AccountsService {
       rememberMe: dto.rememberMe,
     };
 
-    // handles expiring keychains if the keychain is for the same app and user
-    // while this is an async function, we don't want the rest of the code to wait for this to finish
-    // we can think of handleKeychainCopies as a background function
-    handleKeychainCopies(dto.aidn, account.ksn);
-
     // creates a new keychain for the newly created account with keychain data
     logger.info(`createKeychain in signin initiated with ${dto.email}`);
     const keychain: Keychain = await this.keychains.createKeychain(
@@ -275,7 +275,8 @@ export class AccountsService {
       message: `new login email initiated in signin for ${dto.email}`,
       postageDto: loginEmailData,
     });
-    this.postage.sendEmail(loginEmailData);
+
+    await this.postage.sendEmail(loginEmailData);
 
     // send all necessary data back to the client
     const payload: IResponse = {

@@ -63,6 +63,27 @@ export class ApplicationsService {
     return newAppchain;
   }
 
+  async getBasePermission(aidn: number): Promise<string> {
+    let application: Application;
+
+    try {
+      logger.info(
+        `prisma.application.findUnique in getBasePermission initiated`,
+      );
+      application = await this.prisma.application.findUnique({
+        where: { aidn },
+      });
+    } catch (error) {
+      handlePrismaErrors(error);
+    }
+
+    if (!application) {
+      throw new NotFoundException('Application not found');
+    }
+
+    return application.basePermission;
+  }
+
   // creates a new application
   async createApplication(dto: NewApplicationDto): Promise<IResponse> {
     let application: Application;
