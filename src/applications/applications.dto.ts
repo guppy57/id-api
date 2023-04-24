@@ -24,6 +24,10 @@ export class NewApplicationDto {
   @IsString()
   description: string;
 
+  @IsNotEmpty()
+  @IsString()
+  basePermission: string;
+
   logoUrl?: string;
   iconUrl?: string;
 }
@@ -44,6 +48,10 @@ export class UpdateApplicationDto {
   @IsNotEmpty()
   @IsString()
   description: string;
+
+  @IsNotEmpty()
+  @IsString()
+  basePermission: string;
 
   @IsNotEmpty()
   logoUrl: string;

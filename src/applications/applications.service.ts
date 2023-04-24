@@ -83,6 +83,7 @@ export class ApplicationsService {
           description: dto.description,
           logoUrl: dto.logoUrl || '#',
           iconUrl: dto.iconUrl || '#',
+          basePermission: dto.basePermission,
           appchain,
           name: dto.name,
           aidn,
@@ -166,7 +167,7 @@ export class ApplicationsService {
     }
 
     // executes 'verbose' option in url parameter on get one application query
-    if ((query !== undefined || query !== null) && query.verbose === 'true') {
+    if ((query !== undefined || true) && query.verbose === 'true') {
       // verify the appchain since only Kreative services should be able to get stats
       // verifies the appchain sent through the body
       // this method will throw errors if the appchain is not verified
@@ -337,6 +338,7 @@ export class ApplicationsService {
         applicationChange = await this.prisma.application.update({
           where: { aidn },
           data: {
+            basePermission: dto.basePermission,
             name: dto.name,
             callbackUrl: dto.callbackUrl,
             homepage: dto.homepage,
@@ -354,6 +356,7 @@ export class ApplicationsService {
         applicationChange = await this.prisma.application.update({
           where: { aidn },
           data: {
+            basePermission: dto.basePermission,
             name: dto.name,
             callbackUrl: dto.callbackUrl,
             homepage: dto.homepage,
