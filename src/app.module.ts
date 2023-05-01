@@ -38,9 +38,11 @@ import { PhotosModule } from './photos/photos.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(Sentry.Handlers.requestHandler()).forRoutes({
-      path: '*',
-      method: RequestMethod.ALL,
-    });
+    if (process.env.ENVIRONMENT !== 'development') {
+      consumer.apply(Sentry.Handlers.requestHandler()).forRoutes({
+        path: '*',
+        method: RequestMethod.ALL,
+      });
+    }
   }
 }
