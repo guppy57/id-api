@@ -7,10 +7,11 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { VerifyKeychainDto, CloseKeychainDto } from './keychains.dto';
 import { KeychainsService } from './keychains.service';
-
+import { UserAuthGuard } from '../../guards/userAuth.guard';
 import logger from '../../utils/logger';
 
 @Controller('keychains')
@@ -19,6 +20,7 @@ export class KeychainsController {
 
   @Get('')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN']))
   getAllKeychains() {
     logger.info(`GET /keychains initiated`);
     return this.keychainService.getAllKeychains();
