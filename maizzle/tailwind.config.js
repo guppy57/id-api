@@ -1,8 +1,8 @@
 module.exports = {
   theme: {
     screens: {
-      xs: {max: '425px'},
-      sm: {max: '600px'},
+      xs: { max: '425px' },
+      sm: { max: '600px' },
     },
     extend: {
       spacing: {
@@ -92,7 +92,8 @@ module.exports = {
       },
       boxShadow: {
         sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        DEFAULT: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+        DEFAULT:
+          '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
         md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
         lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
         xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
@@ -100,8 +101,21 @@ module.exports = {
         inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
       },
       fontFamily: {
-        sans: ['ui-sans-serif', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],
-        serif: ['ui-serif', 'Georgia', 'Cambria', '"Times New Roman"', 'Times', 'serif'],
+        sans: [
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          '"Segoe UI"',
+          'sans-serif',
+        ],
+        serif: [
+          'ui-serif',
+          'Georgia',
+          'Cambria',
+          '"Times New Roman"',
+          'Times',
+          'serif',
+        ],
         mono: ['ui-monospace', 'Menlo', 'Consolas', 'monospace'],
       },
       fontSize: {
@@ -123,13 +137,13 @@ module.exports = {
         '8xl': '96px',
         '9xl': '128px',
       },
-      letterSpacing: theme => ({
+      letterSpacing: (theme) => ({
         ...theme('spacing'),
       }),
-      lineHeight: theme => ({
+      lineHeight: (theme) => ({
         ...theme('spacing'),
       }),
-      maxWidth: theme => ({
+      maxWidth: (theme) => ({
         ...theme('spacing'),
         xs: '160px',
         sm: '192px',
@@ -143,10 +157,10 @@ module.exports = {
         '6xl': '576px',
         '7xl': '640px',
       }),
-      minHeight: theme => ({
+      minHeight: (theme) => ({
         ...theme('spacing'),
       }),
-      minWidth: theme => ({
+      minWidth: (theme) => ({
         ...theme('spacing'),
       }),
     },
@@ -164,4 +178,4 @@ module.exports = {
     require('tailwindcss-box-shadow'),
     require('tailwindcss-email-variants'),
   ],
-}
+};

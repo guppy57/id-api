@@ -1,5 +1,5 @@
 /* Tailwind CSS components */
-@import "tailwindcss/components";
+@import 'tailwindcss/components';
 
 /**
  * @import here any custom CSS components - that is, CSS that
@@ -8,10 +8,10 @@
 */
 
 /* Tailwind CSS utility classes */
-@import "tailwindcss/utilities";
+@import 'tailwindcss/utilities';
 
 /* Your custom utility classes */
-@import "utilities";
+@import 'utilities';
 
 :root {
   color-scheme: light dark;
