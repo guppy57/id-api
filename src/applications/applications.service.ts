@@ -192,8 +192,8 @@ export class ApplicationsService {
       // verify the appchain since only Kreative services should be able to get stats
       // verifies the appchain sent through the body
       // this method will throw errors if the appchain is not verified
-      const reqAppchain = req.headers['kreative_appchain'] as string;
-      const reqAidn: string = req.headers['kreative_aidn'] as string;
+      const reqAppchain = req.headers.kreative_appchain as string;
+      const reqAidn: string = req.headers.kreative_aidn as string;
       const parsedAidn: number = parseInt(reqAidn);
 
       await verifyAppchain(parsedAidn, reqAppchain);

@@ -30,8 +30,8 @@ export class UserAuthGuard implements CanActivate {
 
   async validateRequest(req: IAuthenticatedRequest): Promise<boolean> {
     let axiosResponse: AxiosResponse<any, any>;
-    const key = req.headers['kreative_id_key'];
-    const aidn = parseInt(req.headers['kreative_aidn']);
+    const key = req.headers.kreative_id_key;
+    const aidn = parseInt(req.headers.kreative_aidn);
     const appchain = req.headers['kreative_appchain'];
 
     if (!key || !aidn || !appchain) {
