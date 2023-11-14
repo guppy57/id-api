@@ -102,8 +102,8 @@ export class ApplicationsService {
           callbackUrl: dto.callbackUrl,
           homepage: dto.homepage,
           description: dto.description,
-          logoUrl: dto.logoUrl || '#',
-          iconUrl: dto.iconUrl || '#',
+          logoUrl: dto.logoUrl ?? '#',
+          iconUrl: dto.iconUrl ?? '#',
           basePermission: dto.basePermission,
           appchain,
           name: dto.name,
@@ -188,7 +188,7 @@ export class ApplicationsService {
     }
 
     // executes 'verbose' option in url parameter on get one application query
-    if ((query !== undefined || true) && query.verbose === 'true') {
+    if ((query !== undefined ?? true) && query.verbose === 'true') {
       // verify the appchain since only Kreative services should be able to get stats
       // verifies the appchain sent through the body
       // this method will throw errors if the appchain is not verified

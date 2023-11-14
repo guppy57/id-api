@@ -55,8 +55,8 @@ export class PostageService {
 
     // mailgun data for the email to be sent
     const mailgunData = {
-      from: dto.fromAddress || `"Kreative" <mailgun@mail.kreativeusa.com>`,
-      replyTo: dto.replyTo || 'armaan@kreativeusa.com',
+      from: dto.fromAddress ?? `"Kreative" <mailgun@mail.kreativeusa.com>`,
+      replyTo: dto.replyTo ?? 'armaan@kreativeusa.com',
       to: dto.toAddress,
       subject: subjectLine,
       html: newHtml,

@@ -10,7 +10,7 @@ import axios, { AxiosResponse } from 'axios';
 import logger from '../utils/logger';
 import { IAuthenticatedRequest } from '../types/IAuthenticatedRequest';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ?? 3000;
 
 const AIDNs: number[] = [
   parseInt(process.env.HOST_AIDN),
