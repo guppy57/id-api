@@ -91,7 +91,7 @@ export class AccountsService {
     // sets the current accounts balance
     walletBalance = account.walletBalance;
     // updates the walletBalance amount
-    const change = dto.type == 'debit' ? dto.amount : dto.amount * -1;
+    const change = dto.type === 'debit' ? dto.amount : dto.amount * -1;
     walletBalance -= change;
 
     try {
