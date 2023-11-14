@@ -1,6 +1,9 @@
-import { NestModule, RequestMethod } from '@nestjs/common';
-import { MiddlewareConsumer } from '@nestjs/common';
-import { Module } from '@nestjs/common';
+import {
+  NestModule,
+  RequestMethod,
+  MiddlewareConsumer,
+  Module,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AccountsModule } from './accounts/accounts.module';
 import { TransactionsModule } from './transactions/transactions.module';
