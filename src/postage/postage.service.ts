@@ -47,6 +47,8 @@ export class PostageService {
         rawHtml = passwordChanged;
         subjectLine = 'Password Changed | Kreative';
         break;
+      default:
+        throw new Error('Invalid template name');
     }
 
     const newHtml = insertDataIntoHtml(rawHtml, dto.data);
