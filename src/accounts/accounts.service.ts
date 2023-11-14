@@ -60,14 +60,14 @@ export class AccountsService {
       // create new random ksn from function
       newKSN = parseInt(nanoid() as string);
       // check if the ksn exists in the database
-      logger.info(`prisma.account.findUnique in generateKSN initiated`);
+      logger.info('prisma.account.findUnique in generateKSN initiated');
       const account = await this.prisma.account.findUnique({
         where: { ksn: newKSN },
       });
       if (account === null) unique = true;
     }
 
-    logger.info(`new ksn generated: ${newKSN}`);
+    logger.info('new ksn generated: ${newKSN}');
     return newKSN;
   }
 
@@ -78,13 +78,13 @@ export class AccountsService {
 
     try {
       // retrieves the current account with ksn
-      logger.info(`prisma.account.findUnique in update balance initiated`);
+      logger.info('prisma.account.findUnique in update balance initiated');
       account = await this.prisma.account.findUnique({
         where: { ksn: dto.ksn },
       });
     } catch (error) {
       // handles any prisma errors
-      logger.error({ message: `prisma.account.findUnique failed`, error });
+      logger.error({ message: 'prisma.account.findUnique failed', error });
       handlePrismaErrors(error);
     }
 
@@ -124,7 +124,7 @@ export class AccountsService {
     const ksn: number = await this.generateKSN();
     // generate the hashed password
     const bpassword: string = await argon2.hash(dto.password);
-    logger.info(`new account password salted to ${bpassword}`);
+    logger.info('new account password salted');
 
     // add the appropriate profile picture for the user
     const firstLetter = dto.firstName.charAt(0).toUpperCase();
@@ -235,7 +235,7 @@ export class AccountsService {
       passwordsMatch = await argon2.verify(account.bpassword, dto.password);
     } catch (error) {
       // internal failure
-      logger.error({ message: `argon2.verify failed`, error });
+      logger.error({ message: 'argon2.verify failed', error });
       throw new InternalServerErrorException();
     }
 
@@ -390,7 +390,7 @@ export class AccountsService {
     try {
       // TODO add email verification flow (if email is different)
       // update account details and returns update
-      logger.info(`prisma.account.update initiated in updateAccount`);
+      logger.info('prisma.account.update initiated in updateAccount');
       account = await this.prisma.account.update({
         where: {
           ksn: req.kreativeAccount.ksn,
@@ -400,7 +400,7 @@ export class AccountsService {
     } catch (error) {
       // handles any prisma errors
       logger.error({
-        message: `prisma.account.update in updateAccount`,
+        message: 'prisma.account.update in updateAccount',
         error,
       });
       handlePrismaErrors(error);
@@ -409,7 +409,7 @@ export class AccountsService {
     // delete sensitive information from account object
     delete account.bpassword;
     delete account.resetCode;
-    logger.info(`sensitive information deleted from account object`);
+    logger.info('sensitive information deleted from account object');
 
     // send all necessary data back to the client
     const payload: IResponse = {
@@ -418,7 +418,7 @@ export class AccountsService {
       data: { account },
     };
 
-    logger.info({ message: `updateAccount succeeded`, payload });
+    logger.info({ message: 'updateAccount succeeded', payload });
     return payload;
   }
 
@@ -431,7 +431,7 @@ export class AccountsService {
 
     try {
       // update account details and returns update
-      logger.info(`prisma.account.update initiated in updateAvatar`);
+      logger.info('prisma.account.update initiated in updateAvatar');
       account = await this.prisma.account.update({
         where: {
           ksn: req.kreativeAccount.ksn,
@@ -443,13 +443,13 @@ export class AccountsService {
     } catch (error) {
       // handles any prisma errors
       logger.error({
-        message: `prisma.account.update in updateAvatar`,
+        message: 'prisma.account.update in updateAvatar',
         error,
       });
       handlePrismaErrors(error);
     }
 
-    logger.info(`sensitive information deleted from account object`);
+    logger.info('sensitive information deleted from account object');
 
     // send all necessary data back to the client
     const payload: IResponse = {
@@ -458,7 +458,7 @@ export class AccountsService {
       data: { profilePicture: account.profilePicture },
     };
 
-    logger.info({ message: `updateAvatar succeeded`, payload });
+    logger.info({ message: 'updateAvatar succeeded', payload });
     return payload;
   }
 
@@ -472,7 +472,7 @@ export class AccountsService {
     // this method also sends back the current account details, this means we don't need to conduct a separate
     // findUnique method to get account details
     logger.info({
-      message: `verifyKeychain in updatePermissions initiated`,
+      message: 'verifyKeychain in updatePermissions initiated',
       body: dto,
     });
     const keychainRes: any = await this.keychains.verifyKeychain({
@@ -496,13 +496,13 @@ export class AccountsService {
       }
     } catch (error) {
       // just in case the for loop crashed, we handle it through an internal server error
-      logger.error({ message: `for loop in updatePermissions failed`, error });
+      logger.error({ message: 'for loop in updatePermissions failed', error });
       throw new InternalServerErrorException("For loop won't process");
     }
 
     try {
       // here we update the account's permissions array
-      logger.info(`prisma.account.update in updatePermissions initiating`);
+      logger.info('prisma.account.update in updatePermissions initiating');
       accountChange = await this.prisma.account.update({
         where: {
           ksn: keychainRes.data.account.ksn,
@@ -514,7 +514,7 @@ export class AccountsService {
     } catch (error) {
       // handles any sort of prisma errors
       logger.error({
-        message: `prisma.account.update in updatePermissions failed`,
+        message: 'prisma.account.update in updatePermissions failed',
         error,
       });
       handlePrismaErrors(error);
@@ -691,7 +691,7 @@ export class AccountsService {
 
     // create salted password for update
     const bpassword: string = await argon2.hash(dto.password);
-    logger.info(`password salted in resetPassword to ${dto.password}`);
+    logger.info('password salted in resetPassword');
 
     try {
       // update the password for the account

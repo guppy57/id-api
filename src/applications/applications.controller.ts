@@ -28,14 +28,14 @@ export class ApplicationsController {
   @Post('')
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async createApplication(@Body() dto: NewApplicationDto): Promise<IResponse> {
-    logger.info({ message: `POST /applications initiated`, body: dto });
+    logger.info({ message: 'POST /applications initiated', body: dto });
     return this.applicationsService.createApplication(dto);
   }
 
   @Get('')
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async getAllApplications(): Promise<IResponse> {
-    logger.info(`GET /applications initiated`);
+    logger.info('GET /applications initiated');
     return this.applicationsService.getAllApplications();
   }
 
@@ -45,7 +45,7 @@ export class ApplicationsController {
     @Param('aidn', ParseIntPipe) aidn: number,
     @Query() query?: { verbose: string },
   ): Promise<IResponse> {
-    logger.info(`GET /applications/${aidn} initiated`);
+    logger.info('GET /applications/${aidn} initiated');
     return this.applicationsService.getOneApplication(req, aidn, query);
   }
 
@@ -73,7 +73,7 @@ export class ApplicationsController {
     @Param('aidn', ParseIntPipe) aidn: number,
     @Body() dto: VerifyAppchainDto,
   ): Promise<IResponse> {
-    logger.info(`POST /applications/:aidn/appchain/verify initiated`);
+    logger.info('POST /applications/:aidn/appchain/verify initiated');
     return this.applicationsService.verifyAppchain(aidn, dto);
   }
 }

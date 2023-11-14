@@ -64,14 +64,14 @@ export class PostageService {
     mailgun.messages
       .create('mail.kreativeusa.com', mailgunData)
       .then((response: any) => {
-        logger.info({ message: `new email sent`, response });
+        logger.info({ message: 'new email sent', response });
         return true;
       })
       .catch((error: any) => {
         // handle any unknown error that comes up
         // we don't want to throw an exception because if sending an email doesn't work
         // the rest of the program should still continue to work
-        logger.error({ message: `new email send failed`, error });
+        logger.error({ message: 'new email send failed', error });
         return false;
       });
   }

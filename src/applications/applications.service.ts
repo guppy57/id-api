@@ -32,7 +32,7 @@ export class ApplicationsService {
       // create new random ksn from function
       newAIDN = parseInt(nanoid() as string);
       // check if the ksn exists in the database
-      logger.info(`prisma.application.findUnique in generateAIDN initiated`);
+      logger.info('prisma.application.findUnique in generateAIDN initiated');
       const application = await this.prisma.application.findUnique({
         where: { aidn: newAIDN },
       });
@@ -51,7 +51,7 @@ export class ApplicationsService {
     // loop to create a completely unique appchain
     while (!unique) {
       logger.info(
-        `prisma.application.findUnique in generateAppchain initiated`,
+        'prisma.application.findUnique in generateAppchain initiated',
       );
       const application = await this.prisma.application.findUnique({
         where: { appchain: newAppchain },
@@ -68,7 +68,7 @@ export class ApplicationsService {
 
     try {
       logger.info(
-        `prisma.application.findUnique in getBasePermission initiated`,
+        'prisma.application.findUnique in getBasePermission initiated',
       );
       application = await this.prisma.application.findUnique({
         where: { aidn },
@@ -112,7 +112,7 @@ export class ApplicationsService {
       });
     } catch (error) {
       // handle any errors prisma throws
-      logger.error({ message: `prisma.application.create failed`, error });
+      logger.error({ message: 'prisma.application.create failed', error });
       handlePrismaErrors(error);
     }
 
@@ -122,7 +122,7 @@ export class ApplicationsService {
       data: { application },
     };
 
-    logger.info({ message: `createApplication succeeded`, payload });
+    logger.info({ message: 'createApplication succeeded', payload });
     return payload;
   }
 
@@ -132,7 +132,7 @@ export class ApplicationsService {
 
     try {
       // find all applications
-      logger.info(`prisma.application.findMany initiated`);
+      logger.info('prisma.application.findMany initiated');
       applications = await this.prisma.application.findMany({
         orderBy: {
           createdAt: 'asc',
@@ -140,7 +140,7 @@ export class ApplicationsService {
       });
     } catch (error) {
       // handle any errors prisma throws
-      logger.error({ message: `prisma.application.findMany failed`, error });
+      logger.error({ message: 'prisma.application.findMany failed', error });
       handlePrismaErrors(error);
     }
 
@@ -150,7 +150,7 @@ export class ApplicationsService {
       data: applications,
     };
 
-    logger.info({ message: `getAllApplications passed`, payload });
+    logger.info({ message: 'getAllApplications passed', payload });
     return payload;
   }
 

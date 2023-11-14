@@ -22,7 +22,7 @@ export class TransactionsService {
 
     try {
       // create a new transaction with prisma
-      logger.info(`prisma.transaction.create initiated`);
+      logger.info('prisma.transaction.create initiated');
       transaction = await this.prisma.transaction.create({
         data: {
           aidn: dto.aidn,
@@ -33,7 +33,7 @@ export class TransactionsService {
       });
     } catch (error) {
       // handle any prisma errors
-      logger.error({ message: `prisma.transaction.create failed`, error });
+      logger.error({ message: 'prisma.transaction.create failed', error });
       handlePrismaErrors(error);
     }
 
@@ -51,7 +51,7 @@ export class TransactionsService {
       data: { newWalletbalance, transaction },
     };
 
-    logger.info({ message: `create transaction succeeded`, payload });
+    logger.info({ message: 'create transaction succeeded', payload });
     return payload;
   }
 
@@ -67,7 +67,7 @@ export class TransactionsService {
       });
     } catch (error) {
       // handles any prisma errors
-      logger.error({ message: `prisma.transaction.findMany failed`, error });
+      logger.error({ message: 'prisma.transaction.findMany failed', error });
       handlePrismaErrors(error);
     }
 
@@ -77,7 +77,7 @@ export class TransactionsService {
       data: { transactions },
     };
 
-    logger.info({ message: `getTransactionsByAccount succeeded`, payload });
+    logger.info({ message: 'getTransactionsByAccount succeeded', payload });
     return payload;
   }
 }

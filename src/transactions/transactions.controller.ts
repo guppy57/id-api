@@ -21,7 +21,7 @@ export class TransactionsController {
 
   @Post('')
   async createTransaction(@Body() dto: CreateTransactionDto) {
-    logger.info({ message: `POST /transactions initiated`, body: dto });
+    logger.info({ message: 'POST /transactions initiated', body: dto });
     return this.transactionsService.createTransaction(dto);
   }
 
