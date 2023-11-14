@@ -25,7 +25,7 @@ const insertDataIntoHtml = (html: string, data: string[]): string => {
 
 @Injectable()
 export class PostageService {
-  async sendEmail(dto: PostageDto): Promise<boolean> {
+  sendEmail(dto: PostageDto): boolean {
     let rawHtml: string;
     let subjectLine: string;
 
