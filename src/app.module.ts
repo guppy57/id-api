@@ -13,6 +13,7 @@ import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
 import { SentryModule } from './sentry/sentry.module';
 import { PhotosModule } from './photos/photos.module';
+import logger from '../utils/logger';
 
 @Module({
   imports: [
@@ -39,7 +40,7 @@ import { PhotosModule } from './photos/photos.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     if (process.env.ENVIRONMENT !== 'development') {
-      console.log('Sentry is enabled!');
+      logger.info('Sentry enabled!');
       consumer.apply(Sentry.Handlers.requestHandler()).forRoutes({
         path: '*',
         method: RequestMethod.ALL,

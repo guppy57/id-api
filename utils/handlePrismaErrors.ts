@@ -40,21 +40,18 @@ export function handlePrismaErrors(error: any, message?: string): void {
     error instanceof
     (PrismaClientUnknownRequestError || PrismaClientRustPanicError)
   ) {
-    console.log(error);
     logger.error({ message: 'prismaError: unknown error', error });
     throw new InternalServerErrorException();
   }
 
   // handles errors of the database and query engine initializing
   if (error instanceof PrismaClientInitializationError) {
-    console.log(error);
     logger.error({ message: 'prismaError: unknown error', error });
     throw new InternalServerErrorException();
   }
 
   // handles errors of PrismaClientValidationError
   if (error instanceof PrismaClientValidationError) {
-    console.log(error);
     logger.error({ message: 'prismaError: unknown bad request error', error });
     throw new BadRequestException();
   }
