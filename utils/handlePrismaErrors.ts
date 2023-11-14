@@ -7,7 +7,6 @@ import {
 
 import {
   PrismaClientInitializationError,
-  PrismaClientKnownRequestError,
   PrismaClientRustPanicError,
   PrismaClientUnknownRequestError,
   PrismaClientValidationError,
