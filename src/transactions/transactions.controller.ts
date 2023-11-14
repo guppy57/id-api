@@ -15,10 +15,6 @@ import logger from '../../utils/logger';
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
-  // TODO: all of these routes need to have a certain level of authentication with keychains
-  // this way only authentication applications/users can create transactions
-  // we could also just authenticate the applications that are making calls to the transactions API
-
   @Post('')
   async createTransaction(@Body() dto: CreateTransactionDto) {
     logger.info({ message: 'POST /transactions initiated', body: dto });

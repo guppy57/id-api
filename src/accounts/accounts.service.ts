@@ -196,7 +196,6 @@ export class AccountsService {
       logger.error(`new welcome email failed to send for ${dto.email}`);
     }
 
-    // TODO: add send email_address verification email + that flow
     // send back positive response, account object, and key
     const payload: IResponse = {
       statusCode: 200,
@@ -392,11 +391,9 @@ export class AccountsService {
       const bpassword: string = await argon2.hash(dto.password);
       logger.info(`password salted in updateAccount to ${bpassword}`);
       updateData.bpassword = bpassword;
-      // TODO send password reset notification email
     }
 
     try {
-      // TODO add email verification flow (if email is different)
       // update account details and returns update
       logger.info('prisma.account.update initiated in updateAccount');
       account = await this.prisma.account.update({

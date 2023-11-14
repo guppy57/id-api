@@ -152,7 +152,6 @@ export class PhotosService {
     };
   }
 
-  // TODO add pagination for this route as there will be a crap ton of photos
   async findAll(): Promise<IResponse> {
     let photos: Photo[];
 
