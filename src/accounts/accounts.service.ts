@@ -190,7 +190,11 @@ export class AccountsService {
       message: `new welcome email initiated in signup for ${dto.email}`,
       postageDto: welcomeEmailData,
     });
-    this.postage.sendEmail(welcomeEmailData);
+    const emailStatus: boolean = this.postage.sendEmail(welcomeEmailData);
+
+    if (!emailStatus) {
+      logger.error(`new welcome email failed to send for ${dto.email}`);
+    }
 
     // TODO: add send email_address verification email + that flow
     // send back positive response, account object, and key
@@ -296,7 +300,11 @@ export class AccountsService {
       postageDto: loginEmailData,
     });
 
-    await this.postage.sendEmail(loginEmailData);
+    const emailStatus: boolean = this.postage.sendEmail(loginEmailData);
+
+    if (!emailStatus) {
+      logger.error(`new login email failed to send for ${dto.email}`);
+    }
 
     // send all necessary data back to the client
     const payload: IResponse = {
@@ -613,7 +621,11 @@ export class AccountsService {
 
     // sends welcome email through PostageModule
     logger.info(`new reset code email initiated in signin for ${dto.email}`);
-    this.postage.sendEmail(codeEmailData);
+    const emailStatus: boolean = this.postage.sendEmail(codeEmailData);
+
+    if (!emailStatus) {
+      logger.error(`new reset code email failed to send for ${dto.email}`);
+    }
 
     // sends resetCode and accountChange
     const payload: IResponse = {
@@ -720,7 +732,15 @@ export class AccountsService {
 
     // sends welcome email through PostageModule
     logger.info(`password changed email initiated for ${accountChange.email}`);
-    this.postage.sendEmail(passwordNotificationEmail);
+    const emailStatus: boolean = this.postage.sendEmail(
+      passwordNotificationEmail,
+    );
+
+    if (!emailStatus) {
+      logger.error(
+        `new password changed email failed to send for ${accountChange.email}`,
+      );
+    }
 
     // sends back account change and successful response
     const payload: IResponse = {
