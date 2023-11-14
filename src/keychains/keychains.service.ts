@@ -26,7 +26,7 @@ const SECRET = process.env.SUPER_SECRET;
 
 @Injectable({})
 export class KeychainsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // returns new keychain after being added to the database
   async createKeychain(dto: KeychainDto): Promise<Keychain> {

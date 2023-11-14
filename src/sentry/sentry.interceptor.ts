@@ -14,7 +14,7 @@ import * as Sentry from '@sentry/node';
  */
 @Injectable({ scope: Scope.REQUEST })
 export class SentryInterceptor implements NestInterceptor {
-  constructor(private sentryService: SentryService) {}
+  constructor(private readonly sentryService: SentryService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     // start a child span for performance tracing

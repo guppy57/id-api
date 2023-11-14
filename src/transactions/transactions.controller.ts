@@ -13,7 +13,7 @@ import logger from '../../utils/logger';
 
 @Controller('transactions')
 export class TransactionsController {
-  constructor(private transactionsService: TransactionsService) {}
+  constructor(private readonly transactionsService: TransactionsService) {}
 
   // TODO: all of these routes need to have a certain level of authentication with keychains
   // this way only authentication applications/users can create transactions

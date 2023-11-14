@@ -23,7 +23,7 @@ import logger from '../../utils/logger';
 
 @Controller('applications')
 export class ApplicationsController {
-  constructor(private applicationsService: ApplicationsService) {}
+  constructor(private readonly applicationsService: ApplicationsService) {}
 
   @Post('')
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))

@@ -11,7 +11,7 @@ import logger from '../../utils/logger';
 
 @Injectable()
 export class TransactionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Inject(AccountsService)
   private readonly accounts: AccountsService;

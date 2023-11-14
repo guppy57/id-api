@@ -16,7 +16,7 @@ import logger from '../../utils/logger';
 
 @Controller('keychains')
 export class KeychainsController {
-  constructor(private keychainService: KeychainsService) {}
+  constructor(private readonly keychainService: KeychainsService) {}
 
   @Get('')
   @HttpCode(HttpStatus.OK)

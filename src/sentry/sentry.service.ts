@@ -22,7 +22,7 @@ export class SentryService {
    *
    * @param request
    */
-  constructor(@Inject(REQUEST) private request: Request) {
+  constructor(@Inject(REQUEST) private readonly request: Request) {
     const { method, headers, url } = this.request;
 
     // recreate transaction based from HTTP request

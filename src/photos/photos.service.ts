@@ -21,7 +21,7 @@ const s3 = new S3({
 
 @Injectable()
 export class PhotosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async uploadPhotoFromFile(
     ksn: number,

@@ -19,7 +19,7 @@ import { verifyAppchain } from '../../utils/verifyAppchain';
 
 @Injectable()
 export class ApplicationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // creates a new, unique application id number
   async generateAIDN(): Promise<number> {
