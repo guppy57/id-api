@@ -263,7 +263,7 @@ export class KeychainsService {
     } else {
       // for some reason the keychain doesn't return from prisma
       logger.error('keychain not returning from prisma');
-      throw new InternalServerErrorException(`Close keychain failed`);
+      throw new InternalServerErrorException('Close keychain failed');
     }
   }
 }
