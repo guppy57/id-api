@@ -6,5 +6,6 @@ export interface IAuthenticatedRequest extends Request {
   headers: Headers & {
     kreative_id_key?: string;
     kreative_aidn?: string;
+    kreative_appchain?: string;
   };
 }
