@@ -32,7 +32,7 @@ export class UserAuthGuard implements CanActivate {
     let axiosResponse: AxiosResponse<any, any>;
     const key = req.headers.kreative_id_key;
     const aidn = parseInt(req.headers.kreative_aidn);
-    const appchain = req.headers['kreative_appchain'];
+    const appchain = req.headers.kreative_appchain;
 
     if (!key || !aidn || !appchain) {
       logger.warn(

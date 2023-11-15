@@ -493,7 +493,7 @@ export class AccountsService {
     try {
       // this functionality shouldn't break or throw an error
       logger.info(`for loop in updatePermissions initiating. for ${email}`);
-      for (const i in dto.newPermissions) {
+      for (const i in Object.keys(dto.newPermissions)) {
         const permission: string = dto.newPermissions[i];
         if (!permissions.includes(permission)) {
           permissions.push(permission);
