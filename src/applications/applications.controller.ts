@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { IResponse } from 'types/IResponse';
+import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
+import { IApplication } from 'types/IApplication';
 import {
   NewApplicationDto,
   UpdateApplicationDto,
@@ -40,13 +42,50 @@ export class ApplicationsController {
   }
 
   @Get(':aidn')
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async getApplication(
-    @Req() req: Request,
+    @Req() req: IAuthenticatedRequest,
     @Param('aidn', ParseIntPipe) aidn: number,
     @Query() query?: { verbose: string },
   ): Promise<IResponse> {
-    logger.info('GET /applications/${aidn} initiated');
+    logger.info(`GET /applications/${aidn} initiated`);
     return this.applicationsService.getOneApplication(req, aidn, query);
+  }
+
+  @Get(':aidn/basic')
+  async getApplicationBasic(
+    @Req() req: Request,
+    @Param('aidn', ParseIntPipe) aidn: number,
+  ): Promise<IResponse> {
+    logger.info(`GET /applications/${aidn}/basic initiated`);
+
+    let response: IResponse = {
+      statusCode: 202,
+      message: 'Application data retrieved (basic)',
+    };
+
+    try {
+      logger.info('this.applicationsService.getOneApplicationBasic() called');
+      const basicAppData: IApplication =
+        await this.applicationsService.getOneApplicationBasic(aidn);
+      response['data'] = basicAppData;
+      logger.info({
+        message: 'this.applicationsService.getOneApplicationBasic() succeeded',
+        data: basicAppData,
+      })
+    } catch (error) {
+      logger.error({
+        message: 'this.applicationsService.getOneApplicationBasic() failed',
+        error,
+      });
+      response = {
+        statusCode: 500,
+        message: error.message,
+        error,
+      };
+    }
+
+    return response;
   }
 
   @Post(':aidn')

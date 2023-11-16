@@ -8,6 +8,7 @@ import { Application, Keychain } from '@prisma/client';
 import { customAlphabet, nanoid } from 'nanoid';
 import { PrismaService } from '../prisma/prisma.service';
 import { IResponse } from '../../types/IResponse';
+import { IApplication } from '../../types/IApplication';
 import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
 import {
   NewApplicationDto,
@@ -155,6 +156,7 @@ export class ApplicationsService {
   }
 
   // retrieves information for a single applicaiton by AIDN
+  // this route is used by Kreative ID Admin and sends back ALL the information for an application
   async getOneApplication(
     req: Request,
     aidn: number,
@@ -335,6 +337,44 @@ export class ApplicationsService {
       payload,
     });
     return payload;
+  }
+
+  // get application basic for Kreative ID customer-facing
+  async getOneApplicationBasic(aidn: number): Promise<Application> {
+    let application: Application;
+
+    try {
+      // gets one application from given AIDN
+      logger.info(`prisma.application.findUnique initiated with aidn: ${aidn}`);
+      application = await this.prisma.application.findUnique({
+        where: { aidn },
+      });
+    } catch (error) {
+      // handles any prisma errors
+      logger.error(
+        `prisma.application.findUnique with aidn: ${aidn} failed`,
+        error,
+      );
+      handlePrismaErrors(error);
+    }
+
+    // checks to see if the application was found
+    // if it's not it will throw a 404 error, if application is found we continue
+    if (application === null || application === undefined) {
+      // no application was found with the aidn that was passed
+      // this behavior should not happen with actual clients as no unknown aidn should exist
+      logger.warn(`no application found with aidn: ${aidn}`);
+      throw new NotFoundException('Application not found');
+    }
+
+    // removes sensitive data from application
+    delete application.appchain;
+
+    logger.info({
+      message: `getOneApplicationBasic succeeded with aidn: ${aidn}`,
+      application,
+    });
+    return application;
   }
 
   // updates one application by AIDN
