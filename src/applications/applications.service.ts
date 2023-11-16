@@ -340,8 +340,8 @@ export class ApplicationsService {
   }
 
   // get application basic for Kreative ID customer-facing
-  async getOneApplicationBasic(aidn: number): Promise<Application> {
-    let application: Application;
+  async getOneApplicationBasic(aidn: number): Promise<IApplication> {
+    let application: IApplication;
 
     try {
       // gets one application from given AIDN
