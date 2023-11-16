@@ -72,7 +72,7 @@ export class ApplicationsController {
       logger.info({
         message: 'this.applicationsService.getOneApplicationBasic() succeeded',
         data: basicAppData,
-      })
+      });
     } catch (error) {
       logger.error({
         message: 'this.applicationsService.getOneApplicationBasic() failed',
