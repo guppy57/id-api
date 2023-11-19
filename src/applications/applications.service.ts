@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import { Application, Keychain } from '@prisma/client';
 import { customAlphabet, nanoid } from 'nanoid';
 import { PrismaService } from '../prisma/prisma.service';
@@ -158,7 +159,7 @@ export class ApplicationsService {
   // retrieves information for a single applicaiton by AIDN
   // this route is used by Kreative ID Admin and sends back ALL the information for an application
   async getOneApplication(
-    req: Request,
+    req: IAuthenticatedRequest,
     aidn: number,
     query?: { verbose: string },
   ): Promise<IResponse> {
