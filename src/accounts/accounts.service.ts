@@ -32,10 +32,11 @@ import { KeychainDto } from '../keychains/keychains.dto';
 import { PostageDto } from '../postage/postage.dto';
 import logger from '../../utils/logger';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
+import axios from 'axios';
 
 @Injectable({})
 export class AccountsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   @Inject(PostageService)
   private readonly postage: PostageService;
@@ -67,7 +68,7 @@ export class AccountsService {
       if (account === null) unique = true;
     }
 
-    logger.info('new ksn generated: ${newKSN}');
+    logger.info(`new ksn generated: ${newKSN}`);
     return newKSN;
   }
 
@@ -132,6 +133,59 @@ export class AccountsService {
 
     const basePermission = await this.applications.getBasePermission(dto.aidn);
 
+    // verify email using Abstract API
+    // will use for other purposes later
+    logger.info(`Abstract API email verification initiated for ${dto.email}`);
+    try {
+      const response = await axios.get(
+        `https://emailvalidation.abstractapi.com/v1/?api_key=${process.env.ABSTRACT_API_KEY}&email=${dto.email}`,
+      );
+      logger.info({
+        message: `Abstract API response received for ${dto.email}`,
+        response,
+      });
+      const suggestion = response.data.autocorrect;
+      if (suggestion === '') {
+        logger.info(`No autocorrect email suggestion for ${dto.email}`);
+      } else {
+        logger.info(
+          `Email autocorrect suggestion for ${dto.email}: ${suggestion}`,
+        );
+      }
+    } catch (error) {
+      logger.error({
+        message: `Abstract API error for ${dto.email}`,
+        error,
+      });
+    }
+
+    let firstName: string;
+    let lastName: string;
+
+    // check if first name and last name are properly capitalized
+    // if not, we capitalize them
+    if (
+      dto.firstName.charAt(0) === dto.firstName.charAt(0).toUpperCase() &&
+      dto.firstName.charAt(1) === dto.firstName.charAt(1).toLowerCase()
+    ) {
+      firstName = dto.firstName;
+    } else {
+      firstName =
+        dto.firstName.charAt(0).toUpperCase() +
+        dto.firstName.slice(1).toLowerCase();
+    }
+
+    if (
+      dto.lastName.charAt(0) === dto.lastName.charAt(0).toUpperCase() &&
+      dto.lastName.charAt(1) === dto.lastName.charAt(1).toLowerCase()
+    ) {
+      lastName = dto.lastName;
+    } else {
+      lastName =
+        dto.lastName.charAt(0).toUpperCase() +
+        dto.lastName.slice(1).toLowerCase();
+    }
+
     try {
       // create the new user in prisma
       logger.info(`prisma.account.create initiated with ${dto.email}`);
@@ -140,8 +194,8 @@ export class AccountsService {
           permissions: ['KREATIVE_ID_USER', basePermission],
           profilePicture: photoUrl,
           email: dto.email,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
+          firstName: firstName,
+          lastName: lastName,
           username: dto.username,
           bpassword,
           ksn,
