@@ -75,7 +75,7 @@ export class AccountsController {
 
   @Get(':ksn')
   getAccount(@Param('ksn', ParseIntPipe) ksn: number): Promise<IResponse> {
-    logger.info('GET /accounts/${ksn} initiated');
+    logger.info(`GET /accounts/${ksn} initiated`);
     return this.accountsService.getAccount(ksn);
   }
 
@@ -94,7 +94,7 @@ export class AccountsController {
     @Body() dto: VerifyCodeDto,
   ): Promise<IResponse> {
     logger.info({
-      message: 'POST /accounts/${ksn}/resetCode/verify initiated',
+      message: `POST /accounts/${ksn}/resetCode/verify initiated`,
       body: dto,
     });
     return this.accountsService.verifyResetCode(ksn, dto);
@@ -106,9 +106,32 @@ export class AccountsController {
     @Body() dto: ResetPasswordDto,
   ) {
     logger.info({
-      message: 'POST /accounts/${ksn}/resetPassword initiated',
+      message: `POST /accounts/${ksn}/resetPassword initiated`,
       body: dto,
     });
     return this.accountsService.resetPassword(ksn, dto);
+  }
+
+  @Post('verify_code/send')
+  async sendEmailVerificationCode(
+    @Body() dto: SendCodeDto,
+  ): Promise<IResponse> {
+    logger.info({
+      message: 'POST /accounts/verify_code/send initiated',
+      body: dto,
+    });
+    return this.accountsService.sendEmailVerificationCode(dto.email);
+  }
+
+  @Post(':ksn/verify_code/verify')
+  async verifyEmailVerificationCode(
+    @Param('ksn', ParseIntPipe) ksn: number,
+    @Body() dto: VerifyCodeDto,
+  ): Promise<IResponse> {
+    logger.info({
+      message: `POST /accounts/${ksn}/verify_code/verify initiated`,
+      body: dto,
+    });
+    return this.accountsService.verifyEmailVerificationCode(ksn, dto.code);
   }
 }

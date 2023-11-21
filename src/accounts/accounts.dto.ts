@@ -121,7 +121,7 @@ export class VerifyCodeDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(6)
-  resetCode: number;
+  code: number;
 }
 
 export class ResetPasswordDto {
