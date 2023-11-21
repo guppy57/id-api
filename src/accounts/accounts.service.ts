@@ -627,8 +627,9 @@ export class AccountsService {
   }
 
   // gets all non-sensitive info for one account
-  async getAccount(ksn: number): Promise<IResponse> {
+  async getAccount(req: IAuthenticatedRequest): Promise<IResponse> {
     let account: Account;
+    const ksn = req.kreativeAccount.ksn;
 
     try {
       logger.info(
@@ -655,6 +656,7 @@ export class AccountsService {
       // removes sensitive information
       delete account.bpassword;
       delete account.resetCode;
+      delete account.verifyCode;
       logger.info(`sensitive info for ${ksn} removed`);
 
       // returns account details
