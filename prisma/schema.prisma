@@ -25,6 +25,7 @@ model Account {
   profilePicture   String        @default("https://cdn.kreativeusa.com/id-profile-pictures/PeachGradient.png")
   walletBalance    Int           @default(0)
   resetCode        Int           @default(0)
+  verifyCode       Int           @default(0)
   permissions      String[]
   keychains        Keychain[]
   transactions     Transaction[]
