@@ -476,7 +476,7 @@ export class AccountsService {
     // if the client sends a new password, then we salt and add it to the updateData object
     if (dto.password) {
       const bpassword: string = await argon2.hash(dto.password);
-      logger.info(`password salted in updateAccount to ${bpassword}`);
+      logger.info(`password salted in updateAccount`);
       updateData.bpassword = bpassword;
     }
 
