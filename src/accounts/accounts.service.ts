@@ -118,6 +118,39 @@ export class AccountsService {
     return walletBalance;
   }
 
+  async verifyCode(code: number, type: string, ksn: number): Promise<boolean> {
+    logger.info(
+      `verifyCode initiated with code: ${code} and type: ${type} for ksn: ${ksn}`,
+    );
+    let account: Account;
+
+    try {
+      // retrieves the current account with ksn
+      logger.info('prisma.account.findUnique in verifyCode initiated');
+      account = await this.prisma.account.findUnique({
+        where: { ksn },
+      });
+    } catch (error) {
+      // handles any prisma errors
+      logger.error({ message: 'prisma.account.findUnique failed', error });
+      handlePrismaErrors(error);
+    }
+
+    if (type === 'verifyCode') {
+      if (account.verifyCode === code) return true;
+      else return false;
+    } else if (type === 'resetCode') {
+      if (account.resetCode === code) return true;
+      else return false;
+    } else {
+      logger.error(
+        `invalid type of ${type} in verifyCode, throwing InternalServerError`,
+      );
+      throw new InternalServerErrorException('verifyCode type not valid');
+    }
+
+  }
+
   // creates a new user account and keychain
   async signup(dto: SignupDto): Promise<IResponse> {
     let account: Account;
@@ -876,31 +909,10 @@ export class AccountsService {
     ksn: number,
     code: number,
   ): Promise<IResponse> {
-    let account: Account;
     let accountChange: any;
 
-    try {
-      // retrieves the accounts
-      logger.info(
-        `prisma.account.findUnique in verifyEmailVerificationCode for ${ksn} initiated`,
-      );
-      account = await this.prisma.account.findUnique({ where: { ksn } });
-    } catch (error) {
-      // handle any prisma errors
-      logger.error({
-        message: `prisma.account.findUnique in verifyEmailVerificationCode for ${ksn} failed`,
-        error,
-      });
-      handlePrismaErrors(error);
-    }
-
     // checks for verifyCode match
-    if (!(account.verifyCode === code)) {
-      logger.info(
-        `verifyCode mismatch for ${ksn}, UnauthorizedException thrown`,
-      );
-      throw new UnauthorizedException('verifyCode mismatch');
-    }
+    const isCorrect: boolean = await this.verifyCode(code, 'verifyCode', ksn);
 
     try {
       // removes the verifyCode from the account
