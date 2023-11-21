@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import { Application, Keychain } from '@prisma/client';
 import { customAlphabet, nanoid } from 'nanoid';
