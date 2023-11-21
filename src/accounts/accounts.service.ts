@@ -715,7 +715,9 @@ export class AccountsService {
     const payload: IResponse = {
       statusCode: 200,
       message: 'Reset code created',
-      data: { resetCode },
+      data: {
+        ksn: accountChange.ksn,
+      },
     };
 
     logger.info({
