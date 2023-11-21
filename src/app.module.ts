@@ -16,6 +16,8 @@ import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
 import { SentryModule } from './sentry/sentry.module';
 import { PhotosModule } from './photos/photos.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { RolesModule } from './roles/roles.module';
 import logger from '../utils/logger';
 
 @Module({
@@ -36,6 +38,8 @@ import logger from '../utils/logger';
     PostageModule,
     SentryModule,
     PhotosModule,
+    PermissionsModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [],
