@@ -36,7 +36,7 @@ import axios from 'axios';
 
 @Injectable({})
 export class AccountsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   @Inject(PostageService)
   private readonly postage: PostageService;
@@ -728,48 +728,20 @@ export class AccountsService {
 
   // verifies the resetCode for the designated account
   async verifyResetCode(ksn: number, dto: VerifyCodeDto): Promise<IResponse> {
-    let account: Account;
     let accountChange: any;
 
-    try {
-      // retrieves the accounts
-      logger.info(
-        `prisma.account.findUnique in verifyResetCode for ${ksn} initiated`,
-      );
-      account = await this.prisma.account.findUnique({ where: { ksn } });
-    } catch (error) {
-      // handle any prisma errors
-      logger.error({
-        message: `prisma.account.findUnique in verifyResetCode for ${ksn} failed`,
-        error,
-      });
-      handlePrismaErrors(error);
-    }
+    const isCorrect: boolean = await this.verifyCode(
+      dto.code,
+      'resetCode',
+      ksn,
+    );
 
     // checks for resetCode match
-    if (!(account.resetCode === dto.code)) {
+    if (!isCorrect) {
       logger.info(
         `resetCode mismatch for ${ksn}, UnauthorizedException thrown`,
       );
       throw new UnauthorizedException('resetCode mismatch');
-    }
-
-    try {
-      // removes the resetCode from the account
-      logger.info(
-        `prisma.account.update in verifyResetCode for ${ksn} initiated`,
-      );
-      accountChange = await this.prisma.account.update({
-        where: { ksn },
-        data: { resetCode: 0 },
-      });
-    } catch (error) {
-      // handles any prisma error
-      logger.info({
-        message: `prisma.account.update in verifyResetCode for ${ksn} failed`,
-        error,
-      });
-      handlePrismaErrors(error);
     }
 
     // returns accountChange data
@@ -793,6 +765,19 @@ export class AccountsService {
     const bpassword: string = await argon2.hash(dto.password);
     logger.info('password salted in resetPassword');
 
+    const isCorrect: boolean = await this.verifyCode(
+      dto.resetCode,
+      'resetCode',
+      ksn,
+    );
+
+    if (!isCorrect) {
+      logger.info(
+        `resetCode mismatch for ${ksn}, UnauthorizedException thrown`,
+      );
+      throw new UnauthorizedException('resetCode mismatch');
+    }
+
     try {
       // update the password for the account
       logger.info(
@@ -800,7 +785,7 @@ export class AccountsService {
       );
       accountChange = await this.prisma.account.update({
         where: { ksn },
-        data: { bpassword },
+        data: { bpassword, resetCode: 0 },
       });
     } catch (error) {
       // handle any prisma errors
@@ -909,10 +894,20 @@ export class AccountsService {
     ksn: number,
     code: number,
   ): Promise<IResponse> {
+    logger.info(
+      `verifyEmailVerificationCode for ${ksn} initiated with code ${code}`,
+    );
     let accountChange: any;
 
     // checks for verifyCode match
     const isCorrect: boolean = await this.verifyCode(code, 'verifyCode', ksn);
+
+    if (!isCorrect) {
+      logger.info(
+        `verifyCode mismatch for ${ksn}, UnauthorizedException thrown`,
+      );
+      throw new UnauthorizedException('verifyCode mismatch');
+    }
 
     try {
       // removes the verifyCode from the account
