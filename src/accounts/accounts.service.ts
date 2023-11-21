@@ -921,7 +921,7 @@ export class AccountsService {
       );
       accountChange = await this.prisma.account.update({
         where: { ksn },
-        data: { verifyCode: 0 },
+        data: { verifyCode: 0, emailVerified: true },
       });
     } catch (error) {
       // handles any prisma error
