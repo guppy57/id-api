@@ -73,10 +73,11 @@ export class AccountsController {
     return this.accountsService.updatePermissions(dto);
   }
 
-  @Get(':ksn')
-  getAccount(@Param('ksn', ParseIntPipe) ksn: number): Promise<IResponse> {
-    logger.info(`GET /accounts/${ksn} initiated`);
-    return this.accountsService.getAccount(ksn);
+  @Get('')
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  getAccount(@Req() req: IAuthenticatedRequest): Promise<IResponse> {
+    logger.info(`GET /accounts initiated`);
+    return this.accountsService.getAccount(req);
   }
 
   @Post('resetCode/send')
