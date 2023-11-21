@@ -6,6 +6,7 @@ import loggedIn from './emails/loggedIn';
 import passwordChanged from './emails/passwordChanged';
 import resetCode from './emails/resetCode';
 import welcome from './emails/welcome';
+import verifyCode from './emails/verifyCode';
 
 import { PostageDto } from './postage.dto';
 import logger from '../../utils/logger';
@@ -25,7 +26,7 @@ const insertDataIntoHtml = (html: string, data: string[]): string => {
 
 @Injectable()
 export class PostageService {
-  sendEmail(dto: PostageDto): boolean {
+  async sendEmail(dto: PostageDto): Promise<boolean> {
     let rawHtml: string;
     let subjectLine: string;
 
@@ -46,6 +47,10 @@ export class PostageService {
       case 'password-changed':
         rawHtml = passwordChanged;
         subjectLine = 'Password Changed | Kreative';
+        break;
+      case 'verify-code':
+        rawHtml = verifyCode;
+        subjectLine = 'Verify your email | Kreative';
         break;
       default:
         throw new Error('Invalid template name');

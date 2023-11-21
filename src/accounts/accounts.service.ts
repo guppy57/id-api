@@ -244,7 +244,7 @@ export class AccountsService {
       message: `new welcome email initiated in signup for ${dto.email}`,
       postageDto: welcomeEmailData,
     });
-    const emailStatus: boolean = this.postage.sendEmail(welcomeEmailData);
+    const emailStatus: boolean = await this.postage.sendEmail(welcomeEmailData);
 
     if (!emailStatus) {
       logger.error(`new welcome email failed to send for ${dto.email}`);
@@ -353,7 +353,7 @@ export class AccountsService {
       postageDto: loginEmailData,
     });
 
-    const emailStatus: boolean = this.postage.sendEmail(loginEmailData);
+    const emailStatus: boolean = await this.postage.sendEmail(loginEmailData);
 
     if (!emailStatus) {
       logger.error(`new login email failed to send for ${dto.email}`);
@@ -672,7 +672,7 @@ export class AccountsService {
 
     // sends welcome email through PostageModule
     logger.info(`new reset code email initiated in signin for ${dto.email}`);
-    const emailStatus: boolean = this.postage.sendEmail(codeEmailData);
+    const emailStatus: boolean = await this.postage.sendEmail(codeEmailData);
 
     if (!emailStatus) {
       logger.error(`new reset code email failed to send for ${dto.email}`);
@@ -682,12 +682,13 @@ export class AccountsService {
     const payload: IResponse = {
       statusCode: 200,
       message: 'Reset code created',
-      data: { resetCode, accountChange },
+      data: { resetCode },
     };
 
     logger.info({
       message: `sendResetCode for ${dto.email} succeeded`,
       payload,
+      accountChange,
     });
     return payload;
   }
@@ -713,7 +714,7 @@ export class AccountsService {
     }
 
     // checks for resetCode match
-    if (!(account.resetCode === dto.resetCode)) {
+    if (!(account.resetCode === dto.code)) {
       logger.info(
         `resetCode mismatch for ${ksn}, UnauthorizedException thrown`,
       );
@@ -742,10 +743,13 @@ export class AccountsService {
     const payload: IResponse = {
       statusCode: 200,
       message: 'resetCode verified',
-      data: { accountChange },
     };
 
-    logger.info({ message: `verifyResetCode for ${ksn} succeeded`, payload });
+    logger.info({
+      message: `verifyResetCode for ${ksn} succeeded`,
+      payload,
+      accountChange,
+    });
     return payload;
   }
 
@@ -783,7 +787,7 @@ export class AccountsService {
 
     // sends welcome email through PostageModule
     logger.info(`password changed email initiated for ${accountChange.email}`);
-    const emailStatus: boolean = this.postage.sendEmail(
+    const emailStatus: boolean = await this.postage.sendEmail(
       passwordNotificationEmail,
     );
 
@@ -797,10 +801,136 @@ export class AccountsService {
     const payload: IResponse = {
       statusCode: 200,
       message: 'Password updated',
-      data: { accountChange },
     };
 
-    logger.info({ message: `resetPassword for ${ksn} succeeded`, payload });
+    logger.info({
+      message: `resetPassword for ${ksn} succeeded`,
+      payload,
+      accountChange,
+    });
+    return payload;
+  }
+
+  // creates a new reset code for the account and sends it
+  async sendEmailVerificationCode(email: string): Promise<IResponse> {
+    let accountChange: any;
+
+    // generates a new verify code as integer
+    const nanoid = customAlphabet('1234567890', 6);
+    const verifyCode: number = parseInt(nanoid() as string);
+    logger.info(`new verifyCode created: ${verifyCode} for ${email}`);
+
+    try {
+      // adds the verifyCode to the account
+      logger.info(
+        `prisma.account.update in sendEmailVerificationCode initiated for ${email}`,
+      );
+      accountChange = await this.prisma.account.update({
+        where: { email },
+        data: { verifyCode },
+      });
+    } catch (error) {
+      // handles any prisma errors
+      logger.error({
+        message: `prisma.account.update in sendEmailVerificationCode for ${email} failed`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    // creates the data for the login notification email
+    const codeEmailData: PostageDto = {
+      toAddress: accountChange.email,
+      template: 'verify-code',
+      data: [accountChange.firstName, verifyCode.toString()],
+    };
+
+    // sends welcome email through PostageModule
+    logger.info(
+      `new verification code email initiated in sendEmailVerificationCode for ${email}`,
+    );
+    const emailStatus: boolean = await this.postage.sendEmail(codeEmailData);
+
+    if (!emailStatus) {
+      logger.error(`new verification code email failed to send for ${email}`);
+    }
+
+    // sends resetCode and accountChange
+    const payload: IResponse = {
+      statusCode: 200,
+      message: 'Reset code created and sent',
+      data: {
+        ksn: accountChange.ksn,
+      },
+    };
+
+    logger.info({
+      message: `sendEmailVerificationCode for ${email} succeeded`,
+      payload,
+    });
+    return payload;
+  }
+
+  // verifies the resetCode for the designated account
+  async verifyEmailVerificationCode(
+    ksn: number,
+    code: number,
+  ): Promise<IResponse> {
+    let account: Account;
+    let accountChange: any;
+
+    try {
+      // retrieves the accounts
+      logger.info(
+        `prisma.account.findUnique in verifyEmailVerificationCode for ${ksn} initiated`,
+      );
+      account = await this.prisma.account.findUnique({ where: { ksn } });
+    } catch (error) {
+      // handle any prisma errors
+      logger.error({
+        message: `prisma.account.findUnique in verifyEmailVerificationCode for ${ksn} failed`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    // checks for verifyCode match
+    if (!(account.verifyCode === code)) {
+      logger.info(
+        `verifyCode mismatch for ${ksn}, UnauthorizedException thrown`,
+      );
+      throw new UnauthorizedException('verifyCode mismatch');
+    }
+
+    try {
+      // removes the verifyCode from the account
+      logger.info(
+        `prisma.account.update in verifyEmailVerificationCode for ${ksn} initiated`,
+      );
+      accountChange = await this.prisma.account.update({
+        where: { ksn },
+        data: { verifyCode: 0 },
+      });
+    } catch (error) {
+      // handles any prisma error
+      logger.info({
+        message: `prisma.account.update in verifyEmailVerificationCode for ${ksn} failed`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    // returns accountChange data
+    const payload: IResponse = {
+      statusCode: 200,
+      message: 'verifyCode passes',
+    };
+
+    logger.info({
+      message: `verifyEmailVerificationCode for ${ksn} succeeded`,
+      payload,
+      accountChange,
+    });
     return payload;
   }
 }
