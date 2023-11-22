@@ -64,13 +64,11 @@ export class ApplicationsService {
     return newAppchain;
   }
 
-  async getBasePermission(aidn: number): Promise<string> {
+  async getBaseRole(aidn: number): Promise<string> {
     let application: Application;
 
     try {
-      logger.info(
-        'prisma.application.findUnique in getBasePermission initiated',
-      );
+      logger.info('prisma.application.findUnique in getBaseRole initiated');
       application = await this.prisma.application.findUnique({
         where: { aidn },
       });
@@ -82,7 +80,7 @@ export class ApplicationsService {
       throw new NotFoundException('Application not found');
     }
 
-    return application.basePermission;
+    return application.baseRole;
   }
 
   // creates a new application
@@ -105,7 +103,7 @@ export class ApplicationsService {
           description: dto.description,
           logoUrl: dto.logoUrl ?? '#',
           iconUrl: dto.iconUrl ?? '#',
-          basePermission: dto.basePermission,
+          baseRole: dto.baseRole,
           appchain,
           name: dto.name,
           aidn,
@@ -399,7 +397,7 @@ export class ApplicationsService {
         applicationChange = await this.prisma.application.update({
           where: { aidn },
           data: {
-            basePermission: dto.basePermission,
+            baseRole: dto.baseRole,
             name: dto.name,
             callbackUrl: dto.callbackUrl,
             homepage: dto.homepage,
@@ -417,7 +415,7 @@ export class ApplicationsService {
         applicationChange = await this.prisma.application.update({
           where: { aidn },
           data: {
-            basePermission: dto.basePermission,
+            baseRole: dto.baseRole,
             name: dto.name,
             callbackUrl: dto.callbackUrl,
             homepage: dto.homepage,

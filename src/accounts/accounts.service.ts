@@ -165,7 +165,7 @@ export class AccountsService {
     const firstLetter = dto.firstName.charAt(0).toUpperCase();
     const photoUrl = `https://cdn.kreativeusa.com/kreative_id/letter_avatars/${firstLetter}.png`;
 
-    const baseRole = await this.applications.getBasePermission(dto.aidn);
+    const baseRole = await this.applications.getBaseRole(dto.aidn);
 
     let firstName: string;
     let lastName: string;
@@ -321,7 +321,7 @@ export class AccountsService {
     logger.info(`removed sensitive account info for ${dto.email}`);
 
     // update user roles if needed
-    const baseRole = await this.applications.getBasePermission(dto.aidn);
+    const baseRole = await this.applications.getBaseRole(dto.aidn);
     await this.roles.addRolesForUser(account.ksn, [baseRole], account.roles);
 
     // sets up data for new Keychain with the keychain dto
