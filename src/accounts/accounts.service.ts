@@ -637,6 +637,9 @@ export class AccountsService {
       );
       account = await this.prisma.account.findUnique({
         where: { ksn },
+        include: {
+          roles: true,
+        },
       });
     } catch (error) {
       // handles prisma errors

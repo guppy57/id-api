@@ -202,6 +202,9 @@ export class KeychainsService {
       );
       account = await this.prisma.account.findUnique({
         where: { ksn: keychain.ksn },
+        include: {
+          roles: true,
+        },
       });
     } catch (error) {
       // handles prisma errors
@@ -213,6 +216,8 @@ export class KeychainsService {
       logger.error('no account was found on keychain');
       throw new NotFoundException('Account not found');
     }
+
+    console.log(account);
 
     // removes sensitive information
     logger.info('sensitive info for account being deleted');
