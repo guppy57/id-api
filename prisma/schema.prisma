@@ -32,7 +32,6 @@ model Account {
   walletBalance    Int               @default(0)
   resetCode        Int               @default(0)
   verifyCode       Int               @default(0)
-  permissions      String[]
   keychains        Keychain[]
   transactions     Transaction[]
   photos           Photo[]

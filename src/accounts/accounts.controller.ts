@@ -16,7 +16,6 @@ import {
   VerifyCodeDto,
   ResetPasswordDto,
   SendCodeDto,
-  UpdatePermissionsDto,
   UpdateAvatarDto,
 } from './accounts.dto';
 import logger from '../../utils/logger';
@@ -61,16 +60,6 @@ export class AccountsController {
       body: dto,
     });
     return this.accountsService.updateAvatar(req, dto);
-  }
-
-  @Post('update/permissions')
-  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
-  updatePermissions(@Body() dto: UpdatePermissionsDto): Promise<IResponse> {
-    logger.info({
-      message: 'POST /accounts/update/permissions initiated',
-      body: dto,
-    });
-    return this.accountsService.updatePermissions(dto);
   }
 
   @Get('')

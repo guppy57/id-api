@@ -86,25 +86,6 @@ export class UpdateWalletBalanceDto {
   type: string;
 }
 
-export class UpdatePermissionsDto {
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(6)
-  aidn: number;
-
-  @IsNotEmpty()
-  @IsString()
-  key: string;
-
-  @IsNotEmpty()
-  @IsString()
-  appchain: string;
-
-  @IsNotEmpty()
-  @IsArray()
-  newPermissions: Array<string>;
-}
-
 export class UpdateAvatarDto {
   @IsNotEmpty()
   @IsUrl()

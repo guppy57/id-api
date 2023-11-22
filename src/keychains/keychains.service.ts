@@ -217,8 +217,6 @@ export class KeychainsService {
       throw new NotFoundException('Account not found');
     }
 
-    console.log(account);
-
     // removes sensitive information
     logger.info('sensitive info for account being deleted');
     delete account.bpassword;

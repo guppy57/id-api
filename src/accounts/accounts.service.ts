@@ -18,7 +18,6 @@ import {
   VerifyCodeDto,
   ResetPasswordDto,
   SendCodeDto,
-  UpdatePermissionsDto,
   UpdateAvatarDto,
 } from './accounts.dto';
 import { IResponse } from '../../types/IResponse';
@@ -148,7 +147,6 @@ export class AccountsService {
       );
       throw new InternalServerErrorException('verifyCode type not valid');
     }
-
   }
 
   // creates a new user account and keychain
@@ -165,32 +163,6 @@ export class AccountsService {
     const photoUrl = `https://cdn.kreativeusa.com/kreative_id/letter_avatars/${firstLetter}.png`;
 
     const basePermission = await this.applications.getBasePermission(dto.aidn);
-
-    // verify email using Abstract API
-    // will use for other purposes later
-    logger.info(`Abstract API email verification initiated for ${dto.email}`);
-    try {
-      const response = await axios.get(
-        `https://emailvalidation.abstractapi.com/v1/?api_key=${process.env.ABSTRACT_API_KEY}&email=${dto.email}`,
-      );
-      logger.info({
-        message: `Abstract API response received for ${dto.email}`,
-        response,
-      });
-      const suggestion = response.data.autocorrect;
-      if (suggestion === '') {
-        logger.info(`No autocorrect email suggestion for ${dto.email}`);
-      } else {
-        logger.info(
-          `Email autocorrect suggestion for ${dto.email}: ${suggestion}`,
-        );
-      }
-    } catch (error) {
-      logger.error({
-        message: `Abstract API error for ${dto.email}`,
-        error,
-      });
-    }
 
     let firstName: string;
     let lastName: string;
@@ -551,78 +523,6 @@ export class AccountsService {
     };
 
     logger.info({ message: 'updateAvatar succeeded', payload });
-    return payload;
-  }
-
-  // updates specifically permissions for an account
-  // because permissions are critical to security, we have to manage this method securely as well,
-  // therefore to execute updatePermissions a valid key has to be sent, and from that key we get the ksn
-  async updatePermissions(dto: UpdatePermissionsDto): Promise<IResponse> {
-    let accountChange: any;
-
-    // verifies that the keychain given is valid
-    // this method also sends back the current account details, this means we don't need to conduct a separate
-    // findUnique method to get account details
-    logger.info({
-      message: 'verifyKeychain in updatePermissions initiated',
-      body: dto,
-    });
-    const keychainRes: any = await this.keychains.verifyKeychain({
-      aidn: dto.aidn,
-      key: dto.key,
-      appchain: dto.appchain,
-    });
-
-    const email = keychainRes.data.account.email;
-    const permissions: Array<string> = keychainRes.data.account.permissions;
-    logger.info(`current permissions for ${email} include: ${permissions}`);
-
-    try {
-      // this functionality shouldn't break or throw an error
-      logger.info(`for loop in updatePermissions initiating. for ${email}`);
-      for (const i in Object.keys(dto.newPermissions)) {
-        const permission: string = dto.newPermissions[i];
-        if (!permissions.includes(permission)) {
-          permissions.push(permission);
-        }
-      }
-    } catch (error) {
-      // just in case the for loop crashed, we handle it through an internal server error
-      logger.error({ message: 'for loop in updatePermissions failed', error });
-      throw new InternalServerErrorException("For loop won't process");
-    }
-
-    try {
-      // here we update the account's permissions array
-      logger.info('prisma.account.update in updatePermissions initiating');
-      accountChange = await this.prisma.account.update({
-        where: {
-          ksn: keychainRes.data.account.ksn,
-        },
-        data: {
-          permissions,
-        },
-      });
-    } catch (error) {
-      // handles any sort of prisma errors
-      logger.error({
-        message: 'prisma.account.update in updatePermissions failed',
-        error,
-      });
-      handlePrismaErrors(error);
-    }
-
-    // all parts passed, successful update functionality
-    const payload: IResponse = {
-      statusCode: 200,
-      message: 'Account permissions updated',
-      data: { accountChange },
-    };
-
-    logger.info({
-      message: `updatePermissions for ${email} succeeded`,
-      payload,
-    });
     return payload;
   }
 
