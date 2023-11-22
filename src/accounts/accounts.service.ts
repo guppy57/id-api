@@ -9,7 +9,7 @@ import {
 import { customAlphabet } from 'nanoid';
 import * as argon2 from 'argon2';
 
-import { Account, Keychain } from '@prisma/client';
+import { Account, Keychain, RolesOnAccounts } from '@prisma/client';
 import {
   SigninDto,
   SignupDto,
@@ -27,11 +27,11 @@ import { KeychainsService } from '../keychains/keychains.service';
 import { PostageService } from '../postage/postage.service';
 import { PhotosService } from '../photos/photos.service';
 import { ApplicationsService } from '../applications/applications.service';
+import { RolesService } from '../roles/roles.service';
 import { KeychainDto } from '../keychains/keychains.dto';
 import { PostageDto } from '../postage/postage.dto';
 import logger from '../../utils/logger';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
-import axios from 'axios';
 
 @Injectable({})
 export class AccountsService {
@@ -48,6 +48,9 @@ export class AccountsService {
 
   @Inject(ApplicationsService)
   private readonly applications: ApplicationsService;
+
+  @Inject(RolesService)
+  private readonly roles: RolesService;
 
   // creates a new, unique kreative service number
   async generateKSN(): Promise<number> {
@@ -162,7 +165,7 @@ export class AccountsService {
     const firstLetter = dto.firstName.charAt(0).toUpperCase();
     const photoUrl = `https://cdn.kreativeusa.com/kreative_id/letter_avatars/${firstLetter}.png`;
 
-    const basePermission = await this.applications.getBasePermission(dto.aidn);
+    const baseRole = await this.applications.getBasePermission(dto.aidn);
 
     let firstName: string;
     let lastName: string;
@@ -196,7 +199,6 @@ export class AccountsService {
       logger.info(`prisma.account.create initiated with ${dto.email}`);
       account = await this.prisma.account.create({
         data: {
-          permissions: ['KREATIVE_ID_USER', basePermission],
           profilePicture: photoUrl,
           email: dto.email,
           firstName: firstName,
@@ -214,6 +216,10 @@ export class AccountsService {
       });
       handlePrismaErrors(error);
     }
+
+    // adds the base permission to the account
+    const roles = ['KREATIVE_ID_USER', baseRole];
+    await this.roles.addRolesForUser(ksn, roles, []);
 
     // removes sensitive information from account object
     delete account.bpassword;
@@ -271,7 +277,7 @@ export class AccountsService {
 
   // creates a new keychain after authentication
   async signin(dto: SigninDto): Promise<IResponse> {
-    let account: Account;
+    let account: any;
     let passwordsMatch: boolean;
 
     try {
@@ -281,6 +287,9 @@ export class AccountsService {
       );
       account = await this.prisma.account.findUniqueOrThrow({
         where: { email: dto.email },
+        include: {
+          roles: true,
+        },
       });
     } catch (error) {
       // handle any other prisma errors that occur
@@ -311,26 +320,9 @@ export class AccountsService {
     delete account.resetCode;
     logger.info(`removed sensitive account info for ${dto.email}`);
 
-    const basePermission = await this.applications.getBasePermission(dto.aidn);
-
-    if (!account.permissions.includes(basePermission)) {
-      try {
-        // create the new user in prisma
-        logger.info(`prisma.account.update initiated with ${dto.email}`);
-        account = await this.prisma.account.update({
-          where: { email: dto.email },
-          data: {
-            permissions: [...account.permissions, basePermission],
-          },
-        });
-      } catch (error) {
-        logger.error({
-          message: `prisma.account.update for ${dto.email} failed`,
-          error,
-        });
-        handlePrismaErrors(error);
-      }
-    }
+    // update user roles if needed
+    const baseRole = await this.applications.getBasePermission(dto.aidn);
+    await this.roles.addRolesForUser(account.ksn, [baseRole], account.roles);
 
     // sets up data for new Keychain with the keychain dto
     const keychainData: KeychainDto = {
