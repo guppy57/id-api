@@ -33,7 +33,8 @@ export function handlePrismaErrors(error: any, message?: string): void {
   // and handles errors of if the underlying engine/system crashes
   if (
     error instanceof
-    (Prisma.PrismaClientUnknownRequestError || Prisma.PrismaClientRustPanicError)
+    (Prisma.PrismaClientUnknownRequestError ||
+      Prisma.PrismaClientRustPanicError)
   ) {
     logger.error({ message: 'prismaError: unknown error', error });
     throw new InternalServerErrorException();
