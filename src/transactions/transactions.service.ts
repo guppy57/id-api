@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Transaction } from '@prisma/client';
-
 import { UpdateWalletBalanceDto } from '../accounts/accounts.dto';
 import { AccountsService } from '../accounts/accounts.service';
 import { PrismaService } from '../prisma/prisma.service';

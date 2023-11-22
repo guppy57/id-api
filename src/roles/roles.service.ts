@@ -1,11 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IResponse } from '../../types/IResponse';
 import logger from '../../utils/logger';
-import { handlePrismaErrors } from 'utils/handlePrismaErrors';
+import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
 import { RolesOnAccounts } from '@prisma/client';
 import compareRoles from '../../utils/compareRoles';
-import { CONTAINS } from 'class-validator';
 
 @Injectable()
 export class RolesService {

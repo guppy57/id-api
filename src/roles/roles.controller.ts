@@ -2,7 +2,7 @@ import { Controller, UseGuards, Post, Body, Req } from '@nestjs/common';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
 import { RolesService } from './roles.service';
 import { IResponse } from '../../types/IResponse';
-import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
+import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 import logger from '../../utils/logger';
 
 // for the sake of time, we are forgoing back office routes
