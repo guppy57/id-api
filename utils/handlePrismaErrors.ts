@@ -5,12 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import {
-  PrismaClientInitializationError,
-  PrismaClientRustPanicError,
-  PrismaClientUnknownRequestError,
-  PrismaClientValidationError,
-} from '@prisma/client/runtime';
+import { Prisma } from '@prisma/client';
 import logger from './logger';
 
 // handles different prisma errors and sends a response
@@ -38,20 +33,20 @@ export function handlePrismaErrors(error: any, message?: string): void {
   // and handles errors of if the underlying engine/system crashes
   if (
     error instanceof
-    (PrismaClientUnknownRequestError || PrismaClientRustPanicError)
+    (Prisma.PrismaClientUnknownRequestError || Prisma.PrismaClientRustPanicError)
   ) {
     logger.error({ message: 'prismaError: unknown error', error });
     throw new InternalServerErrorException();
   }
 
   // handles errors of the database and query engine initializing
-  if (error instanceof PrismaClientInitializationError) {
+  if (error instanceof Prisma.PrismaClientInitializationError) {
     logger.error({ message: 'prismaError: unknown error', error });
     throw new InternalServerErrorException();
   }
 
   // handles errors of PrismaClientValidationError
-  if (error instanceof PrismaClientValidationError) {
+  if (error instanceof Prisma.PrismaClientValidationError) {
     logger.error({ message: 'prismaError: unknown bad request error', error });
     throw new BadRequestException();
   }
