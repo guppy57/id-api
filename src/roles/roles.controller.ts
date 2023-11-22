@@ -13,18 +13,29 @@ import logger from '../../utils/logger';
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  // add or remove a role from a user
-  @Post('manage')
+  // remove a role from a user
+  @Post('remove')
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
-  async manageRolesForUser(
+  async removeRole(
     @Req() req: IAuthenticatedRequest,
     @Body('role') role: string,
-    @Body('action') action: string,
   ): Promise<IResponse> {
-    logger.info('POST /roles/manage initiated');
+    logger.info('POST /roles/remove initiated');
     const ksn = req.kreativeAccount.ksn;
-    const aidn = req.requestingAIDN;
-    return this.rolesService.updateRolesForUser(ksn, role, action, aidn);
+    return this.rolesService.removeRoleForUser(ksn, role);
+  }
+
+  // attach roles to a user
+  @Post('add')
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  async addRole(
+    @Req() req: IAuthenticatedRequest,
+    @Body('roles') roles: string[],
+  ): Promise<IResponse> {
+    logger.info('POST /roles/add initiated');
+    const ksn = req.kreativeAccount.ksn;
+    const existingRoles = req.kreativeAccount.roles;
+    return this.rolesService.addRolesForUser(ksn, roles, existingRoles);
   }
 
   // verify that a user has a specific role
