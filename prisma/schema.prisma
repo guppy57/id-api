@@ -81,15 +81,6 @@ model Application {
   permissions    Permission[]
 }
 
-model Permission {
-  id          String      @id
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  application Application @relation(fields: [aidn], references: [aidn], onDelete: Cascade, onUpdate: Cascade)
-  aidn        Int
-  description String?
-}
-
 model Role {
   id          String            @id
   createdAt   DateTime          @default(now())
@@ -98,6 +89,7 @@ model Role {
   aidn        Int
   description String?
   accounts    RolesOnAccounts[]
+  Permission  Permission[]
 }
 
 model RolesOnAccounts {
@@ -108,6 +100,17 @@ model RolesOnAccounts {
   ksn       Int
   role      Role     @relation(fields: [rid], references: [id], onDelete: Cascade, onUpdate: Cascade)
   rid       String
+}
+
+model Permission {
+  id          String      @id
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  application Application @relation(fields: [aidn], references: [aidn], onDelete: Cascade, onUpdate: Cascade)
+  aidn        Int
+  description String?
+  role        Role        @relation(fields: [rid], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rid         String
 }
 
 model Photo {
