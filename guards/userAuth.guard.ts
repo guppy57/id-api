@@ -35,14 +35,14 @@ export class UserAuthGuard implements CanActivate {
     let axiosResponse: AxiosResponse<any, any>;
     const key = req.headers.kreative_id_key;
     const aidn = parseInt(req.headers.kreative_aidn);
-    const appchain = req.headers.kreative_appchain;
+    const appchain = process.env.APPCHAIN;
 
-    if (!key || !aidn || !appchain) {
+    if (!key || !aidn) {
       logger.warn(
         'authenticate user middleware sent 400 due to missing key, aidn',
       );
       throw new HttpException(
-        'key, aidn, or appchain missing in headers',
+        'key or aidn missing in headers',
         HttpStatus.BAD_REQUEST,
       );
     }
