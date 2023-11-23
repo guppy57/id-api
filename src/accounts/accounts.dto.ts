@@ -1,5 +1,4 @@
 import {
-  IsArray,
   IsBoolean,
   IsEmail,
   IsNotEmpty,
@@ -22,9 +21,11 @@ export class SignupDto {
   password: string;
 
   @IsNotEmpty()
+  @IsString()
   firstName: string;
 
   @IsNotEmpty()
+  @IsString()
   lastName: string;
 
   @IsNotEmpty()
@@ -60,9 +61,11 @@ export class UpdateAccountDto {
   email: string;
 
   @IsNotEmpty()
+  @IsString()
   firstName: string;
 
   @IsNotEmpty()
+  @IsString()
   lastName: string;
 
   @IsNotEmpty()
@@ -83,6 +86,7 @@ export class UpdateWalletBalanceDto {
   amount: number;
 
   @IsNotEmpty()
+  @IsString()
   type: string;
 }
 
