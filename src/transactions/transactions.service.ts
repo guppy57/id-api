@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Transaction } from '@prisma/client';
+import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import { UpdateWalletBalanceDto } from '../accounts/accounts.dto';
 import { AccountsService } from '../accounts/accounts.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -16,7 +17,10 @@ export class TransactionsService {
   private readonly accounts: AccountsService;
 
   // creates a new transaction and updates account balance
-  async createTransaction(dto: CreateTransactionDto): Promise<IResponse> {
+  async createTransaction(
+    req: IAuthenticatedRequest,
+    dto: CreateTransactionDto,
+  ): Promise<IResponse> {
     let transaction: Transaction;
 
     try {
@@ -24,8 +28,8 @@ export class TransactionsService {
       logger.info('prisma.transaction.create initiated');
       transaction = await this.prisma.transaction.create({
         data: {
+          ksn: req.kreativeAccount.ksn,
           aidn: dto.aidn,
-          ksn: dto.ksn,
           type: dto.type,
           amount: dto.amount,
         },
