@@ -5,11 +5,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator erd {
-  provider                  = "prisma-erd-generator"
-  output                    = "./ERD.png"
-  includeRelationFromFields = true
-}
+// this doesn't work in docker as well so taking it out for time being
+// generator erd {
+//   provider                  = "prisma-erd-generator"
+//   output                    = "./ERD.png"
+//   includeRelationFromFields = true
+// }
 
 datasource db {
   provider = "postgresql"
