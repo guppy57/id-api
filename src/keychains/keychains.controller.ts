@@ -26,14 +26,12 @@ export class KeychainsController {
     return this.keychainService.getAllKeychains();
   }
 
-  @Post(':id/close')
+  @Post('close')
   @HttpCode(HttpStatus.OK)
-  closeKeychain(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: CloseKeychainDto,
-  ) {
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  closeKeychain(@Body() keychain: string) {
     logger.info('POST /keychains/close initiated');
-    return this.keychainService.closeKeychain(id, dto);
+    return this.keychainService.closeKeychain(key);
   }
 
   @Post('verify')
