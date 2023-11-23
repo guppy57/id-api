@@ -236,17 +236,13 @@ export class KeychainsService {
   }
 
   // expires the keychain
-  async closeKeychain(id: number, dto: CloseKeychainDto): Promise<IResponse> {
+  async closeKeychain(key: string): Promise<IResponse> {
     let keychain: any;
-
-    // verifies the appchain sent through the body
-    // this method will throw errors if the appchain is not verified
-    await verifyAppchain(dto.aidn, dto.appchain);
 
     try {
       logger.info(`prisma.keychain.update initiated for close keychain: ${id}`);
-      keychain = await this.prisma.keychain.update({
-        where: { id },
+      keychain = await this.prisma.keychain.updateMany({
+        where: { key },
         data: { expired: true },
       });
     } catch (error) {
