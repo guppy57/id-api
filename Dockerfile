@@ -7,6 +7,7 @@ WORKDIR /home/node
 COPY . /home/node
 
 RUN yarn install
+RUN yarn prisma generate
 RUN yarn build
 
 # ---
@@ -27,4 +28,4 @@ COPY --from=builder /home/node/package*.json /home/node/
 COPY --from=builder /home/node/node_modules/ /home/node/node_modules/
 COPY --from=builder /home/node/dist/ /home/node/dist/
 
-CMD ["doppler", "run", "--", "node", "-r", "newrelic", "dist/src/main"]
+CMD ["doppler", "run", "--", "node", "dist/src/main"]
