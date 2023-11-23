@@ -22,13 +22,14 @@ export class TransactionsService {
     dto: CreateTransactionDto,
   ): Promise<IResponse> {
     let transaction: Transaction;
+    const ksn = req.kreativeAccount.ksn;
 
     try {
       // create a new transaction with prisma
       logger.info('prisma.transaction.create initiated');
       transaction = await this.prisma.transaction.create({
         data: {
-          ksn: req.kreativeAccount.ksn,
+          ksn,
           aidn: dto.aidn,
           type: dto.type,
           amount: dto.amount,
@@ -41,9 +42,9 @@ export class TransactionsService {
     }
 
     // update wallet balance in the designated account
-    logger.info(`accounts.updateWalletBalance initiated for ksn: ${dto.ksn}`);
+    logger.info(`accounts.updateWalletBalance initiated for ksn: ${ksn}`);
     const newWalletbalance = await this.accounts.updateWalletBalance({
-      ksn: dto.ksn,
+      ksn: ksn,
       type: dto.type,
       amount: dto.amount,
     } satisfies UpdateWalletBalanceDto);
