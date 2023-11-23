@@ -240,7 +240,7 @@ export class KeychainsService {
     let keychain: any;
 
     try {
-      logger.info(`prisma.keychain.update initiated for close keychain: ${id}`);
+      logger.info(`prisma.keychain.update initiated for key: ${key}`);
       keychain = await this.prisma.keychain.updateMany({
         where: { key },
         data: { expired: true },

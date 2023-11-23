@@ -29,7 +29,7 @@ export class KeychainsController {
   @Post('close')
   @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
-  closeKeychain(@Body() keychain: string) {
+  closeKeychain(@Body() key: string) {
     logger.info('POST /keychains/close initiated');
     return this.keychainService.closeKeychain(key);
   }
