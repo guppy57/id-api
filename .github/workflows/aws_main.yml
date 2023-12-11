@@ -8,7 +8,16 @@ on:
 jobs:
   cdk-deploy:
     runs-on: buildjet-2vcpu-ubuntu-2204
-    steps:  
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS credentials with GitHub-AWS OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
