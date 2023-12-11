@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - main
+      - deploy-on-aws
 
 jobs:
   cdk-deploy:
