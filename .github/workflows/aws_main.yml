@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cdk-deploy:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    steps:  
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: install aws cdk
+        run: npm install -g aws-cdk
+
+      - name: install dependencies
+        run: cd id-api-stack && npm i
+
+      - name: deploy
+        run: cd id-api-stack && cdk deploy --require-approval never
