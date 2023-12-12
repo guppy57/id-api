@@ -4,7 +4,7 @@ import { Construct } from 'constructs';
 import * as apprunner from '@aws-cdk/aws-apprunner-alpha';
 import * as ecrassets from 'aws-cdk-lib/aws-ecr-assets';
 
-export class IdApiStackStack extends cdk.Stack {
+export class IdApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
