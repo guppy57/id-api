@@ -28,6 +28,6 @@ jobs:
         run: npm install -g aws-cdk
 
       - name: deploy
-        run: cd id-api-stack && npm i && npm run build && cdk deploy --require-approval never
+        run: cd id-api-stack && npm i && cdk deploy --require-approval never
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}

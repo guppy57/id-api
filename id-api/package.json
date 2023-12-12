@@ -1,0 +1,19 @@
+{
+  "name": "id-api",
+  "version": "0.1.0",
+  "bin": {
+    "id-api": "bin/id-api.js"
+  },
+  "scripts": {
+    "build": "echo \"The build step is not required when using JavaScript!\" && exit 0",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "aws-cdk": "2.114.1"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-apprunner-alpha": "^2.114.1-alpha.0",
+    "aws-cdk-lib": "2.114.1",
+    "constructs": "^10.0.0"
+  }
+}

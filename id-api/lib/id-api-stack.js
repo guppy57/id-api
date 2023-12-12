@@ -1,11 +1,16 @@
-import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
-import * as apprunner from '@aws-cdk/aws-apprunner-alpha';
-import * as ecrassets from 'aws-cdk-lib/aws-ecr-assets';
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { Stack } = require('aws-cdk-lib');
+const apprunner = require('@aws-cdk/aws-apprunner-alpha');
+const ecrassets = require('aws-cdk-lib/aws-ecr-assets');
 
-export class IdApiStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+class IdApiStack extends Stack {
+  /**
+   *
+   * @param {Construct} scope
+   * @param {string} id
+   * @param {StackProps=} props
+   */
+  constructor(scope, id, props) {
     super(scope, id, props);
 
     const idApiImage = new ecrassets.DockerImageAsset(
@@ -31,3 +36,5 @@ export class IdApiStack extends cdk.Stack {
     );
   }
 }
+
+module.exports = { IdApiStack };
