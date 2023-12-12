@@ -18,7 +18,7 @@ class IdApiStack extends Stack {
       'KreativeIdApiImage',
       {
         directory: '../',
-        exclude: ['id-api-stack'],
+        exclude: ['id-api-cdk'],
       },
     );
 
