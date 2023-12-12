@@ -8,7 +8,7 @@ export class IdApiStackStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const kreativeIdApiImage = new ecrassets.DockerImageAsset(
+    const idApiImage = new ecrassets.DockerImageAsset(
       this,
       'KreativeIdApiImage',
       {
@@ -17,12 +17,17 @@ export class IdApiStackStack extends cdk.Stack {
       },
     );
 
-    new apprunner.Service(this, 'Service', {
+    const idApiAppRunner = new apprunner.Service(this, 'Service', {
       source: apprunner.Source.fromAsset({
         imageConfiguration: { port: 3000 },
-        asset: kreativeIdApiImage,
+        asset: idApiImage,
       }),
       autoDeploymentsEnabled: true,
     });
+
+    idApiAppRunner.addEnvironmentVariable(
+      'DOPPLER_TOKEN',
+      process.env.DOPPLER_TOKEN,
+    );
   }
 }
