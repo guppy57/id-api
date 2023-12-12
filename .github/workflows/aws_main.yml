@@ -32,3 +32,5 @@ jobs:
 
       - name: deploy
         run: cd id-api-stack && cdk deploy --require-approval never
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
