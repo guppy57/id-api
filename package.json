@@ -51,7 +51,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "sharp": "^0.32.0",
-    "winston": "^3.8.2"
+    "winston": "^3.8.2",
+    "wretch": "^2.7.1"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^10.6.1",
