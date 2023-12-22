@@ -3,11 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import { Application, Keychain } from '@prisma/client';
 import { customAlphabet, nanoid } from 'nanoid';
 import { PrismaService } from '../prisma/prisma.service';
 import { IResponse } from '../../types/IResponse';
+import { IApplication } from '../../types/IApplication';
 import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
 import {
   NewApplicationDto,
@@ -19,7 +20,7 @@ import { verifyAppchain } from '../../utils/verifyAppchain';
 
 @Injectable()
 export class ApplicationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // creates a new, unique application id number
   async generateAIDN(): Promise<number> {
@@ -32,7 +33,7 @@ export class ApplicationsService {
       // create new random ksn from function
       newAIDN = parseInt(nanoid() as string);
       // check if the ksn exists in the database
-      logger.info(`prisma.application.findUnique in generateAIDN initiated`);
+      logger.info('prisma.application.findUnique in generateAIDN initiated');
       const application = await this.prisma.application.findUnique({
         where: { aidn: newAIDN },
       });
@@ -51,7 +52,7 @@ export class ApplicationsService {
     // loop to create a completely unique appchain
     while (!unique) {
       logger.info(
-        `prisma.application.findUnique in generateAppchain initiated`,
+        'prisma.application.findUnique in generateAppchain initiated',
       );
       const application = await this.prisma.application.findUnique({
         where: { appchain: newAppchain },
@@ -63,13 +64,11 @@ export class ApplicationsService {
     return newAppchain;
   }
 
-  async getBasePermission(aidn: number): Promise<string> {
+  async getBaseRole(aidn: number): Promise<string> {
     let application: Application;
 
     try {
-      logger.info(
-        `prisma.application.findUnique in getBasePermission initiated`,
-      );
+      logger.info('prisma.application.findUnique in getBaseRole initiated');
       application = await this.prisma.application.findUnique({
         where: { aidn },
       });
@@ -81,7 +80,7 @@ export class ApplicationsService {
       throw new NotFoundException('Application not found');
     }
 
-    return application.basePermission;
+    return application.baseRole;
   }
 
   // creates a new application
@@ -102,9 +101,9 @@ export class ApplicationsService {
           callbackUrl: dto.callbackUrl,
           homepage: dto.homepage,
           description: dto.description,
-          logoUrl: dto.logoUrl || '#',
-          iconUrl: dto.iconUrl || '#',
-          basePermission: dto.basePermission,
+          logoUrl: dto.logoUrl ?? '#',
+          iconUrl: dto.iconUrl ?? '#',
+          baseRole: dto.baseRole,
           appchain,
           name: dto.name,
           aidn,
@@ -112,7 +111,7 @@ export class ApplicationsService {
       });
     } catch (error) {
       // handle any errors prisma throws
-      logger.error({ message: `prisma.application.create failed`, error });
+      logger.error({ message: 'prisma.application.create failed', error });
       handlePrismaErrors(error);
     }
 
@@ -122,7 +121,7 @@ export class ApplicationsService {
       data: { application },
     };
 
-    logger.info({ message: `createApplication succeeded`, payload });
+    logger.info({ message: 'createApplication succeeded', payload });
     return payload;
   }
 
@@ -132,7 +131,7 @@ export class ApplicationsService {
 
     try {
       // find all applications
-      logger.info(`prisma.application.findMany initiated`);
+      logger.info('prisma.application.findMany initiated');
       applications = await this.prisma.application.findMany({
         orderBy: {
           createdAt: 'asc',
@@ -140,7 +139,7 @@ export class ApplicationsService {
       });
     } catch (error) {
       // handle any errors prisma throws
-      logger.error({ message: `prisma.application.findMany failed`, error });
+      logger.error({ message: 'prisma.application.findMany failed', error });
       handlePrismaErrors(error);
     }
 
@@ -150,13 +149,14 @@ export class ApplicationsService {
       data: applications,
     };
 
-    logger.info({ message: `getAllApplications passed`, payload });
+    logger.info({ message: 'getAllApplications passed', payload });
     return payload;
   }
 
   // retrieves information for a single applicaiton by AIDN
+  // this route is used by Kreative ID Admin and sends back ALL the information for an application
   async getOneApplication(
-    req: Request,
+    req: IAuthenticatedRequest,
     aidn: number,
     query?: { verbose: string },
   ): Promise<IResponse> {
@@ -188,12 +188,12 @@ export class ApplicationsService {
     }
 
     // executes 'verbose' option in url parameter on get one application query
-    if ((query !== undefined || true) && query.verbose === 'true') {
+    if ((query !== undefined ?? true) && query.verbose === 'true') {
       // verify the appchain since only Kreative services should be able to get stats
       // verifies the appchain sent through the body
       // this method will throw errors if the appchain is not verified
-      const reqAppchain = req.headers['kreative_appchain'] as string;
-      const reqAidn: string = req.headers['kreative_aidn'] as string;
+      const reqAppchain = req.headers.kreative_appchain as string;
+      const reqAidn: string = req.headers.kreative_aidn as string;
       const parsedAidn: number = parseInt(reqAidn);
 
       await verifyAppchain(parsedAidn, reqAppchain);
@@ -337,6 +337,44 @@ export class ApplicationsService {
     return payload;
   }
 
+  // get application basic for Kreative ID customer-facing
+  async getOneApplicationBasic(aidn: number): Promise<IApplication> {
+    let application: IApplication;
+
+    try {
+      // gets one application from given AIDN
+      logger.info(`prisma.application.findUnique initiated with aidn: ${aidn}`);
+      application = await this.prisma.application.findUnique({
+        where: { aidn },
+      });
+    } catch (error) {
+      // handles any prisma errors
+      logger.error(
+        `prisma.application.findUnique with aidn: ${aidn} failed`,
+        error,
+      );
+      handlePrismaErrors(error);
+    }
+
+    // checks to see if the application was found
+    // if it's not it will throw a 404 error, if application is found we continue
+    if (application === null || application === undefined) {
+      // no application was found with the aidn that was passed
+      // this behavior should not happen with actual clients as no unknown aidn should exist
+      logger.warn(`no application found with aidn: ${aidn}`);
+      throw new NotFoundException('Application not found');
+    }
+
+    // removes sensitive data from application
+    delete application.appchain;
+
+    logger.info({
+      message: `getOneApplicationBasic succeeded with aidn: ${aidn}`,
+      application,
+    });
+    return application;
+  }
+
   // updates one application by AIDN
   async updateApplication(
     aidn: number,
@@ -359,7 +397,7 @@ export class ApplicationsService {
         applicationChange = await this.prisma.application.update({
           where: { aidn },
           data: {
-            basePermission: dto.basePermission,
+            baseRole: dto.baseRole,
             name: dto.name,
             callbackUrl: dto.callbackUrl,
             homepage: dto.homepage,
@@ -377,7 +415,7 @@ export class ApplicationsService {
         applicationChange = await this.prisma.application.update({
           where: { aidn },
           data: {
-            basePermission: dto.basePermission,
+            baseRole: dto.baseRole,
             name: dto.name,
             callbackUrl: dto.callbackUrl,
             homepage: dto.homepage,

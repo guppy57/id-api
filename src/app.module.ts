@@ -1,6 +1,9 @@
-import { NestModule, RequestMethod } from '@nestjs/common';
-import { MiddlewareConsumer } from '@nestjs/common';
-import { Module } from '@nestjs/common';
+import {
+  NestModule,
+  RequestMethod,
+  MiddlewareConsumer,
+  Module,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AccountsModule } from './accounts/accounts.module';
 import { TransactionsModule } from './transactions/transactions.module';
@@ -13,6 +16,9 @@ import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
 import { SentryModule } from './sentry/sentry.module';
 import { PhotosModule } from './photos/photos.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { RolesModule } from './roles/roles.module';
+import logger from '../utils/logger';
 
 @Module({
   imports: [
@@ -32,6 +38,8 @@ import { PhotosModule } from './photos/photos.module';
     PostageModule,
     SentryModule,
     PhotosModule,
+    PermissionsModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [],
@@ -39,6 +47,7 @@ import { PhotosModule } from './photos/photos.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     if (process.env.ENVIRONMENT !== 'development') {
+      logger.info('Sentry enabled!');
       consumer.apply(Sentry.Handlers.requestHandler()).forRoutes({
         path: '*',
         method: RequestMethod.ALL,

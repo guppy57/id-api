@@ -1,3 +1,4 @@
+
 import {
   ConflictException,
   Inject,
@@ -9,7 +10,7 @@ import {
 import { customAlphabet } from 'nanoid';
 import * as argon2 from 'argon2';
 
-import { Account, Keychain } from '@prisma/client';
+import { Account, Keychain, RolesOnAccounts } from '@prisma/client';
 import {
   SigninDto,
   SignupDto,
@@ -18,7 +19,6 @@ import {
   VerifyCodeDto,
   ResetPasswordDto,
   SendCodeDto,
-  UpdatePermissionsDto,
   UpdateAvatarDto,
 } from './accounts.dto';
 import { IResponse } from '../../types/IResponse';
@@ -28,6 +28,7 @@ import { KeychainsService } from '../keychains/keychains.service';
 import { PostageService } from '../postage/postage.service';
 import { PhotosService } from '../photos/photos.service';
 import { ApplicationsService } from '../applications/applications.service';
+import { RolesService } from '../roles/roles.service';
 import { KeychainDto } from '../keychains/keychains.dto';
 import { PostageDto } from '../postage/postage.dto';
 import logger from '../../utils/logger';
@@ -35,7 +36,7 @@ import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Injectable({})
 export class AccountsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Inject(PostageService)
   private readonly postage: PostageService;
@@ -49,6 +50,9 @@ export class AccountsService {
   @Inject(ApplicationsService)
   private readonly applications: ApplicationsService;
 
+  @Inject(RolesService)
+  private readonly roles: RolesService;
+
   // creates a new, unique kreative service number
   async generateKSN(): Promise<number> {
     let unique = false;
@@ -60,7 +64,7 @@ export class AccountsService {
       // create new random ksn from function
       newKSN = parseInt(nanoid() as string);
       // check if the ksn exists in the database
-      logger.info(`prisma.account.findUnique in generateKSN initiated`);
+      logger.info('prisma.account.findUnique in generateKSN initiated');
       const account = await this.prisma.account.findUnique({
         where: { ksn: newKSN },
       });
@@ -78,20 +82,20 @@ export class AccountsService {
 
     try {
       // retrieves the current account with ksn
-      logger.info(`prisma.account.findUnique in update balance initiated`);
+      logger.info('prisma.account.findUnique in update balance initiated');
       account = await this.prisma.account.findUnique({
         where: { ksn: dto.ksn },
       });
     } catch (error) {
       // handles any prisma errors
-      logger.error({ message: `prisma.account.findUnique failed`, error });
+      logger.error({ message: 'prisma.account.findUnique failed', error });
       handlePrismaErrors(error);
     }
 
     // sets the current accounts balance
     walletBalance = account.walletBalance;
     // updates the walletBalance amount
-    const change = dto.type == 'debit' ? dto.amount : dto.amount * -1;
+    const change = dto.type === 'debit' ? dto.amount : dto.amount * -1;
     walletBalance -= change;
 
     try {
@@ -117,6 +121,38 @@ export class AccountsService {
     return walletBalance;
   }
 
+  async verifyCode(code: number, type: string, ksn: number): Promise<boolean> {
+    logger.info(
+      `verifyCode initiated with code: ${code} and type: ${type} for ksn: ${ksn}`,
+    );
+    let account: Account;
+
+    try {
+      // retrieves the current account with ksn
+      logger.info('prisma.account.findUnique in verifyCode initiated');
+      account = await this.prisma.account.findUnique({
+        where: { ksn },
+      });
+    } catch (error) {
+      // handles any prisma errors
+      logger.error({ message: 'prisma.account.findUnique failed', error });
+      handlePrismaErrors(error);
+    }
+
+    if (type === 'verifyCode') {
+      if (account.verifyCode === code) return true;
+      else return false;
+    } else if (type === 'resetCode') {
+      if (account.resetCode === code) return true;
+      else return false;
+    } else {
+      logger.error(
+        `invalid type of ${type} in verifyCode, throwing InternalServerError`,
+      );
+      throw new InternalServerErrorException('verifyCode type not valid');
+    }
+  }
+
   // creates a new user account and keychain
   async signup(dto: SignupDto): Promise<IResponse> {
     let account: Account;
@@ -124,24 +160,50 @@ export class AccountsService {
     const ksn: number = await this.generateKSN();
     // generate the hashed password
     const bpassword: string = await argon2.hash(dto.password);
-    logger.info(`new account password salted to ${bpassword}`);
+    logger.info('new account password salted');
 
     // add the appropriate profile picture for the user
     const firstLetter = dto.firstName.charAt(0).toUpperCase();
     const photoUrl = `https://cdn.kreativeusa.com/kreative_id/letter_avatars/${firstLetter}.png`;
 
-    const basePermission = await this.applications.getBasePermission(dto.aidn);
+    const baseRole = await this.applications.getBaseRole(dto.aidn);
+
+    let firstName: string;
+    let lastName: string;
+
+    // check if first name and last name are properly capitalized
+    // if not, we capitalize them
+    if (
+      dto.firstName.charAt(0) === dto.firstName.charAt(0).toUpperCase() &&
+      dto.firstName.charAt(1) === dto.firstName.charAt(1).toLowerCase()
+    ) {
+      firstName = dto.firstName;
+    } else {
+      firstName =
+        dto.firstName.charAt(0).toUpperCase() +
+        dto.firstName.slice(1).toLowerCase();
+    }
+
+    if (
+      dto.lastName.charAt(0) === dto.lastName.charAt(0).toUpperCase() &&
+      dto.lastName.charAt(1) === dto.lastName.charAt(1).toLowerCase()
+    ) {
+      lastName = dto.lastName;
+    } else {
+      lastName =
+        dto.lastName.charAt(0).toUpperCase() +
+        dto.lastName.slice(1).toLowerCase();
+    }
 
     try {
       // create the new user in prisma
       logger.info(`prisma.account.create initiated with ${dto.email}`);
       account = await this.prisma.account.create({
         data: {
-          permissions: ['KREATIVE_ID_USER', basePermission],
           profilePicture: photoUrl,
           email: dto.email,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
+          firstName: firstName,
+          lastName: lastName,
           username: dto.username,
           bpassword,
           ksn,
@@ -155,6 +217,10 @@ export class AccountsService {
       });
       handlePrismaErrors(error);
     }
+
+    // adds the base permission to the account
+    const roles = ['KREATIVE_ID_USER', baseRole];
+    await this.roles.addRolesForUser(ksn, roles, []);
 
     // removes sensitive information from account object
     delete account.bpassword;
@@ -190,9 +256,12 @@ export class AccountsService {
       message: `new welcome email initiated in signup for ${dto.email}`,
       postageDto: welcomeEmailData,
     });
-    this.postage.sendEmail(welcomeEmailData);
+    const emailStatus: boolean = await this.postage.sendEmail(welcomeEmailData);
 
-    // TODO: add send email_address verification email + that flow
+    if (!emailStatus) {
+      logger.error(`new welcome email failed to send for ${dto.email}`);
+    }
+
     // send back positive response, account object, and key
     const payload: IResponse = {
       statusCode: 200,
@@ -209,7 +278,7 @@ export class AccountsService {
 
   // creates a new keychain after authentication
   async signin(dto: SigninDto): Promise<IResponse> {
-    let account: Account;
+    let account: any;
     let passwordsMatch: boolean;
 
     try {
@@ -219,6 +288,9 @@ export class AccountsService {
       );
       account = await this.prisma.account.findUniqueOrThrow({
         where: { email: dto.email },
+        include: {
+          roles: true,
+        },
       });
     } catch (error) {
       // handle any other prisma errors that occur
@@ -235,7 +307,7 @@ export class AccountsService {
       passwordsMatch = await argon2.verify(account.bpassword, dto.password);
     } catch (error) {
       // internal failure
-      logger.error({ message: `argon2.verify failed`, error });
+      logger.error({ message: 'argon2.verify failed', error });
       throw new InternalServerErrorException();
     }
 
@@ -249,26 +321,9 @@ export class AccountsService {
     delete account.resetCode;
     logger.info(`removed sensitive account info for ${dto.email}`);
 
-    const basePermission = await this.applications.getBasePermission(dto.aidn);
-
-    if (!account.permissions.includes(basePermission)) {
-      try {
-        // create the new user in prisma
-        logger.info(`prisma.account.update initiated with ${dto.email}`);
-        account = await this.prisma.account.update({
-          where: { email: dto.email },
-          data: {
-            permissions: [...account.permissions, basePermission],
-          },
-        });
-      } catch (error) {
-        logger.error({
-          message: `prisma.account.update for ${dto.email} failed`,
-          error,
-        });
-        handlePrismaErrors(error);
-      }
-    }
+    // update user roles if needed
+    const baseRole = await this.applications.getBaseRole(dto.aidn);
+    await this.roles.addRolesForUser(account.ksn, [baseRole], account.roles);
 
     // sets up data for new Keychain with the keychain dto
     const keychainData: KeychainDto = {
@@ -296,7 +351,11 @@ export class AccountsService {
       postageDto: loginEmailData,
     });
 
-    await this.postage.sendEmail(loginEmailData);
+    const emailStatus: boolean = await this.postage.sendEmail(loginEmailData);
+
+    if (!emailStatus) {
+      logger.error(`new login email failed to send for ${dto.email}`);
+    }
 
     // send all necessary data back to the client
     const payload: IResponse = {
@@ -382,15 +441,13 @@ export class AccountsService {
     // if the client sends a new password, then we salt and add it to the updateData object
     if (dto.password) {
       const bpassword: string = await argon2.hash(dto.password);
-      logger.info(`password salted in updateAccount to ${bpassword}`);
+      logger.info(`password salted in updateAccount`);
       updateData.bpassword = bpassword;
-      // TODO send password reset notification email
     }
 
     try {
-      // TODO add email verification flow (if email is different)
       // update account details and returns update
-      logger.info(`prisma.account.update initiated in updateAccount`);
+      logger.info('prisma.account.update initiated in updateAccount');
       account = await this.prisma.account.update({
         where: {
           ksn: req.kreativeAccount.ksn,
@@ -400,7 +457,7 @@ export class AccountsService {
     } catch (error) {
       // handles any prisma errors
       logger.error({
-        message: `prisma.account.update in updateAccount`,
+        message: 'prisma.account.update in updateAccount',
         error,
       });
       handlePrismaErrors(error);
@@ -409,7 +466,7 @@ export class AccountsService {
     // delete sensitive information from account object
     delete account.bpassword;
     delete account.resetCode;
-    logger.info(`sensitive information deleted from account object`);
+    logger.info('sensitive information deleted from account object');
 
     // send all necessary data back to the client
     const payload: IResponse = {
@@ -418,7 +475,7 @@ export class AccountsService {
       data: { account },
     };
 
-    logger.info({ message: `updateAccount succeeded`, payload });
+    logger.info({ message: 'updateAccount succeeded', payload });
     return payload;
   }
 
@@ -431,7 +488,7 @@ export class AccountsService {
 
     try {
       // update account details and returns update
-      logger.info(`prisma.account.update initiated in updateAvatar`);
+      logger.info('prisma.account.update initiated in updateAvatar');
       account = await this.prisma.account.update({
         where: {
           ksn: req.kreativeAccount.ksn,
@@ -443,13 +500,13 @@ export class AccountsService {
     } catch (error) {
       // handles any prisma errors
       logger.error({
-        message: `prisma.account.update in updateAvatar`,
+        message: 'prisma.account.update in updateAvatar',
         error,
       });
       handlePrismaErrors(error);
     }
 
-    logger.info(`sensitive information deleted from account object`);
+    logger.info('sensitive information deleted from account object');
 
     // send all necessary data back to the client
     const payload: IResponse = {
@@ -458,85 +515,14 @@ export class AccountsService {
       data: { profilePicture: account.profilePicture },
     };
 
-    logger.info({ message: `updateAvatar succeeded`, payload });
-    return payload;
-  }
-
-  // updates specifically permissions for an account
-  // because permissions are critical to security, we have to manage this method securely as well,
-  // therefore to execute updatePermissions a valid key has to be sent, and from that key we get the ksn
-  async updatePermissions(dto: UpdatePermissionsDto): Promise<IResponse> {
-    let accountChange: any;
-
-    // verifies that the keychain given is valid
-    // this method also sends back the current account details, this means we don't need to conduct a separate
-    // findUnique method to get account details
-    logger.info({
-      message: `verifyKeychain in updatePermissions initiated`,
-      body: dto,
-    });
-    const keychainRes: any = await this.keychains.verifyKeychain({
-      aidn: dto.aidn,
-      key: dto.key,
-      appchain: dto.appchain,
-    });
-
-    const email = keychainRes.data.account.email;
-    const permissions: Array<string> = keychainRes.data.account.permissions;
-    logger.info(`current permissions for ${email} include: ${permissions}`);
-
-    try {
-      // this functionality shouldn't break or throw an error
-      logger.info(`for loop in updatePermissions initiating. for ${email}`);
-      for (let i = 0; i < dto.newPermissions.length; i++) {
-        const permission: string = dto.newPermissions[i];
-        if (!permissions.includes(permission)) {
-          permissions.push(permission);
-        }
-      }
-    } catch (error) {
-      // just in case the for loop crashed, we handle it through an internal server error
-      logger.error({ message: `for loop in updatePermissions failed`, error });
-      throw new InternalServerErrorException("For loop won't process");
-    }
-
-    try {
-      // here we update the account's permissions array
-      logger.info(`prisma.account.update in updatePermissions initiating`);
-      accountChange = await this.prisma.account.update({
-        where: {
-          ksn: keychainRes.data.account.ksn,
-        },
-        data: {
-          permissions,
-        },
-      });
-    } catch (error) {
-      // handles any sort of prisma errors
-      logger.error({
-        message: `prisma.account.update in updatePermissions failed`,
-        error,
-      });
-      handlePrismaErrors(error);
-    }
-
-    // all parts passed, successful update functionality
-    const payload: IResponse = {
-      statusCode: 200,
-      message: 'Account permissions updated',
-      data: { accountChange },
-    };
-
-    logger.info({
-      message: `updatePermissions for ${email} succeeded`,
-      payload,
-    });
+    logger.info({ message: 'updateAvatar succeeded', payload });
     return payload;
   }
 
   // gets all non-sensitive info for one account
-  async getAccount(ksn: number): Promise<IResponse> {
+  async getAccount(req: IAuthenticatedRequest): Promise<IResponse> {
     let account: Account;
+    const ksn = req.kreativeAccount.ksn;
 
     try {
       logger.info(
@@ -544,6 +530,9 @@ export class AccountsService {
       );
       account = await this.prisma.account.findUnique({
         where: { ksn },
+        include: {
+          roles: true,
+        },
       });
     } catch (error) {
       // handles prisma errors
@@ -563,6 +552,7 @@ export class AccountsService {
       // removes sensitive information
       delete account.bpassword;
       delete account.resetCode;
+      delete account.verifyCode;
       logger.info(`sensitive info for ${ksn} removed`);
 
       // returns account details
@@ -613,76 +603,58 @@ export class AccountsService {
 
     // sends welcome email through PostageModule
     logger.info(`new reset code email initiated in signin for ${dto.email}`);
-    this.postage.sendEmail(codeEmailData);
+    const emailStatus: boolean = await this.postage.sendEmail(codeEmailData);
+
+    if (!emailStatus) {
+      logger.error(`new reset code email failed to send for ${dto.email}`);
+    }
 
     // sends resetCode and accountChange
     const payload: IResponse = {
       statusCode: 200,
       message: 'Reset code created',
-      data: { resetCode, accountChange },
+      data: {
+        ksn: accountChange.ksn,
+      },
     };
 
     logger.info({
       message: `sendResetCode for ${dto.email} succeeded`,
       payload,
+      accountChange,
     });
     return payload;
   }
 
   // verifies the resetCode for the designated account
   async verifyResetCode(ksn: number, dto: VerifyCodeDto): Promise<IResponse> {
-    let account: Account;
     let accountChange: any;
 
-    try {
-      // retrieves the accounts
-      logger.info(
-        `prisma.account.findUnique in verifyResetCode for ${ksn} initiated`,
-      );
-      account = await this.prisma.account.findUnique({ where: { ksn } });
-    } catch (error) {
-      // handle any prisma errors
-      logger.error({
-        message: `prisma.account.findUnique in verifyResetCode for ${ksn} failed`,
-        error,
-      });
-      handlePrismaErrors(error);
-    }
+    const isCorrect: boolean = await this.verifyCode(
+      dto.code,
+      'resetCode',
+      ksn,
+    );
 
     // checks for resetCode match
-    if (!(account.resetCode === dto.resetCode)) {
+    if (!isCorrect) {
       logger.info(
         `resetCode mismatch for ${ksn}, UnauthorizedException thrown`,
       );
       throw new UnauthorizedException('resetCode mismatch');
     }
 
-    try {
-      // removes the resetCode from the account
-      logger.info(
-        `prisma.account.update in verifyResetCode for ${ksn} initiated`,
-      );
-      accountChange = await this.prisma.account.update({
-        where: { ksn },
-        data: { resetCode: 0 },
-      });
-    } catch (error) {
-      // handles any prisma error
-      logger.info({
-        message: `prisma.account.update in verifyResetCode for ${ksn} failed`,
-        error,
-      });
-      handlePrismaErrors(error);
-    }
-
     // returns accountChange data
     const payload: IResponse = {
       statusCode: 200,
       message: 'resetCode verified',
-      data: { accountChange },
     };
 
-    logger.info({ message: `verifyResetCode for ${ksn} succeeded`, payload });
+    logger.info({
+      message: `verifyResetCode for ${ksn} succeeded`,
+      payload,
+      accountChange,
+    });
     return payload;
   }
 
@@ -691,7 +663,20 @@ export class AccountsService {
 
     // create salted password for update
     const bpassword: string = await argon2.hash(dto.password);
-    logger.info(`password salted in resetPassword to ${dto.password}`);
+    logger.info('password salted in resetPassword');
+
+    const isCorrect: boolean = await this.verifyCode(
+      dto.resetCode,
+      'resetCode',
+      ksn,
+    );
+
+    if (!isCorrect) {
+      logger.info(
+        `resetCode mismatch for ${ksn}, UnauthorizedException thrown`,
+      );
+      throw new UnauthorizedException('resetCode mismatch');
+    }
 
     try {
       // update the password for the account
@@ -700,7 +685,7 @@ export class AccountsService {
       );
       accountChange = await this.prisma.account.update({
         where: { ksn },
-        data: { bpassword },
+        data: { bpassword, resetCode: 0 },
       });
     } catch (error) {
       // handle any prisma errors
@@ -720,16 +705,139 @@ export class AccountsService {
 
     // sends welcome email through PostageModule
     logger.info(`password changed email initiated for ${accountChange.email}`);
-    this.postage.sendEmail(passwordNotificationEmail);
+    const emailStatus: boolean = await this.postage.sendEmail(
+      passwordNotificationEmail,
+    );
+
+    if (!emailStatus) {
+      logger.error(
+        `new password changed email failed to send for ${accountChange.email}`,
+      );
+    }
 
     // sends back account change and successful response
     const payload: IResponse = {
       statusCode: 200,
       message: 'Password updated',
-      data: { accountChange },
     };
 
-    logger.info({ message: `resetPassword for ${ksn} succeeded`, payload });
+    logger.info({
+      message: `resetPassword for ${ksn} succeeded`,
+      payload,
+      accountChange,
+    });
+    return payload;
+  }
+
+  // creates a new reset code for the account and sends it
+  async sendEmailVerificationCode(email: string): Promise<IResponse> {
+    let accountChange: any;
+
+    // generates a new verify code as integer
+    const nanoid = customAlphabet('1234567890', 6);
+    const verifyCode: number = parseInt(nanoid() as string);
+    logger.info(`new verifyCode created: ${verifyCode} for ${email}`);
+
+    try {
+      // adds the verifyCode to the account
+      logger.info(
+        `prisma.account.update in sendEmailVerificationCode initiated for ${email}`,
+      );
+      accountChange = await this.prisma.account.update({
+        where: { email },
+        data: { verifyCode },
+      });
+    } catch (error) {
+      // handles any prisma errors
+      logger.error({
+        message: `prisma.account.update in sendEmailVerificationCode for ${email} failed`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    // creates the data for the login notification email
+    const codeEmailData: PostageDto = {
+      toAddress: accountChange.email,
+      template: 'verify-code',
+      data: [accountChange.firstName, verifyCode.toString()],
+    };
+
+    // sends welcome email through PostageModule
+    logger.info(
+      `new verification code email initiated in sendEmailVerificationCode for ${email}`,
+    );
+    const emailStatus: boolean = await this.postage.sendEmail(codeEmailData);
+
+    if (!emailStatus) {
+      logger.error(`new verification code email failed to send for ${email}`);
+    }
+
+    // sends resetCode and accountChange
+    const payload: IResponse = {
+      statusCode: 200,
+      message: 'Reset code created and sent',
+      data: {
+        ksn: accountChange.ksn,
+      },
+    };
+
+    logger.info({
+      message: `sendEmailVerificationCode for ${email} succeeded`,
+      payload,
+    });
+    return payload;
+  }
+
+  // verifies the resetCode for the designated account
+  async verifyEmailVerificationCode(
+    ksn: number,
+    code: number,
+  ): Promise<IResponse> {
+    logger.info(
+      `verifyEmailVerificationCode for ${ksn} initiated with code ${code}`,
+    );
+    let accountChange: any;
+
+    // checks for verifyCode match
+    const isCorrect: boolean = await this.verifyCode(code, 'verifyCode', ksn);
+
+    if (!isCorrect) {
+      logger.info(
+        `verifyCode mismatch for ${ksn}, UnauthorizedException thrown`,
+      );
+      throw new UnauthorizedException('verifyCode mismatch');
+    }
+
+    try {
+      // removes the verifyCode from the account
+      logger.info(
+        `prisma.account.update in verifyEmailVerificationCode for ${ksn} initiated`,
+      );
+      accountChange = await this.prisma.account.update({
+        where: { ksn },
+        data: { verifyCode: 0, emailVerified: true },
+      });
+    } catch (error) {
+      // handles any prisma error
+      logger.info({
+        message: `prisma.account.update in verifyEmailVerificationCode for ${ksn} failed`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    // returns accountChange data
+    const payload: IResponse = {
+      statusCode: 200,
+      message: 'verifyCode passes',
+    };
+
+    logger.info({
+      message: `verifyEmailVerificationCode for ${ksn} succeeded`,
+      payload,
+      accountChange,
+    });
     return payload;
   }
 }

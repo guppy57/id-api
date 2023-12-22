@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { IResponse } from 'types/IResponse';
+import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
+import { IApplication } from 'types/IApplication';
 import {
   NewApplicationDto,
   UpdateApplicationDto,
@@ -23,30 +25,67 @@ import logger from '../../utils/logger';
 
 @Controller('applications')
 export class ApplicationsController {
-  constructor(private applicationsService: ApplicationsService) {}
+  constructor(private readonly applicationsService: ApplicationsService) {}
 
   @Post('')
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async createApplication(@Body() dto: NewApplicationDto): Promise<IResponse> {
-    logger.info({ message: `POST /applications initiated`, body: dto });
+    logger.info({ message: 'POST /applications initiated', body: dto });
     return this.applicationsService.createApplication(dto);
   }
 
   @Get('')
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async getAllApplications(): Promise<IResponse> {
-    logger.info(`GET /applications initiated`);
+    logger.info('GET /applications initiated');
     return this.applicationsService.getAllApplications();
   }
 
   @Get(':aidn')
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async getApplication(
-    @Req() req: Request,
+    @Req() req: IAuthenticatedRequest,
     @Param('aidn', ParseIntPipe) aidn: number,
     @Query() query?: { verbose: string },
   ): Promise<IResponse> {
     logger.info(`GET /applications/${aidn} initiated`);
     return this.applicationsService.getOneApplication(req, aidn, query);
+  }
+
+  @Get(':aidn/basic')
+  async getApplicationBasic(
+    @Req() req: Request,
+    @Param('aidn', ParseIntPipe) aidn: number,
+  ): Promise<IResponse> {
+    logger.info(`GET /applications/${aidn}/basic initiated`);
+
+    let response: IResponse = {
+      statusCode: 202,
+      message: 'Application data retrieved (basic)',
+    };
+
+    try {
+      logger.info('this.applicationsService.getOneApplicationBasic() called');
+      const basicAppData: IApplication =
+        await this.applicationsService.getOneApplicationBasic(aidn);
+      response['data'] = basicAppData;
+      logger.info({
+        message: 'this.applicationsService.getOneApplicationBasic() succeeded',
+        data: basicAppData,
+      });
+    } catch (error) {
+      logger.error({
+        message: 'this.applicationsService.getOneApplicationBasic() failed',
+        error,
+      });
+      response = {
+        statusCode: 500,
+        message: error.message,
+        error,
+      };
+    }
+
+    return response;
   }
 
   @Post(':aidn')
@@ -73,7 +112,7 @@ export class ApplicationsController {
     @Param('aidn', ParseIntPipe) aidn: number,
     @Body() dto: VerifyAppchainDto,
   ): Promise<IResponse> {
-    logger.info(`POST /applications/:aidn/appchain/verify initiated`);
+    logger.info('POST /applications/:aidn/appchain/verify initiated');
     return this.applicationsService.verifyAppchain(aidn, dto);
   }
 }

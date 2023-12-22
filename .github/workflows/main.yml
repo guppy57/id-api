@@ -25,6 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn install
+      - run: yarn prisma generate
       - run: NODE_ENV=development yarn lint
       - run: NODE_ENV=development yarn build
       - run: NODE_ENV=development yarn test

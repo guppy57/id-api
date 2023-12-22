@@ -3,11 +3,6 @@ import { IsNotEmpty, IsNumber, Min } from 'class-validator';
 export class CreateTransactionDto {
   @IsNotEmpty()
   @IsNumber()
-  @Min(8)
-  ksn: number;
-
-  @IsNotEmpty()
-  @IsNumber()
   @Min(6)
   aidn: number;
 

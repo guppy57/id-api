@@ -1,5 +1,4 @@
 import {
-  IsArray,
   IsBoolean,
   IsEmail,
   IsNotEmpty,
@@ -22,9 +21,11 @@ export class SignupDto {
   password: string;
 
   @IsNotEmpty()
+  @IsString()
   firstName: string;
 
   @IsNotEmpty()
+  @IsString()
   lastName: string;
 
   @IsNotEmpty()
@@ -60,9 +61,11 @@ export class UpdateAccountDto {
   email: string;
 
   @IsNotEmpty()
+  @IsString()
   firstName: string;
 
   @IsNotEmpty()
+  @IsString()
   lastName: string;
 
   @IsNotEmpty()
@@ -83,26 +86,8 @@ export class UpdateWalletBalanceDto {
   amount: number;
 
   @IsNotEmpty()
+  @IsString()
   type: string;
-}
-
-export class UpdatePermissionsDto {
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(6)
-  aidn: number;
-
-  @IsNotEmpty()
-  @IsString()
-  key: string;
-
-  @IsNotEmpty()
-  @IsString()
-  appchain: string;
-
-  @IsNotEmpty()
-  @IsArray()
-  newPermissions: Array<string>;
 }
 
 export class UpdateAvatarDto {
@@ -121,10 +106,15 @@ export class VerifyCodeDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(6)
-  resetCode: number;
+  code: number;
 }
 
 export class ResetPasswordDto {
   @IsNotEmpty()
   password: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(6)
+  resetCode: number;
 }

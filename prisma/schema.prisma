@@ -5,30 +5,38 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// this doesn't work in docker as well so taking it out for time being
+// generator erd {
+//   provider                  = "prisma-erd-generator"
+//   output                    = "./ERD.png"
+//   includeRelationFromFields = true
+// }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Account {
-  ksn              Int           @id
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  username         String        @unique
+  ksn              Int               @id
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  username         String            @unique
   firstName        String
   lastName         String
-  email            String        @unique
+  email            String            @unique
   phoneCountryCode Int?
   phoneNumber      Int?
   bpassword        String
-  emailVerified    Boolean       @default(false)
-  profilePicture   String        @default("https://cdn.kreativeusa.com/id-profile-pictures/PeachGradient.png")
-  walletBalance    Int           @default(0)
-  resetCode        Int           @default(0)
-  permissions      String[]
+  emailVerified    Boolean           @default(false)
+  profilePicture   String            @default("https://cdn.kreativeusa.com/id-profile-pictures/PeachGradient.png")
+  walletBalance    Int               @default(0)
+  resetCode        Int               @default(0)
+  verifyCode       Int               @default(0)
   keychains        Keychain[]
   transactions     Transaction[]
-  Photos           Photo[]
+  photos           Photo[]
+  roles            RolesOnAccounts[]
 }
 
 model Transaction {
@@ -56,19 +64,53 @@ model Keychain {
 }
 
 model Application {
-  aidn           Int           @id
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  name           String
-  callbackUrl    String        @default("#")
-  appchain       String        @unique
-  homepage       String        @default("#")
-  description    String        @default("#")
-  logoUrl        String        @default("#")
-  iconUrl        String        @default("#")
-  basePermission String        @default("KREATIVE_USER")
-  keychains      Keychain[]
-  transactions   Transaction[]
+  aidn         Int           @id
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  name         String
+  callbackUrl  String        @default("#")
+  appchain     String        @unique
+  homepage     String        @default("#")
+  description  String        @default("#")
+  logoUrl      String        @default("#")
+  iconUrl      String        @default("#")
+  baseRole     String        @default("KREATIVE_USER")
+  keychains    Keychain[]
+  transactions Transaction[]
+  roles        Role[]
+  permissions  Permission[]
+}
+
+model Role {
+  id          String            @id
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  application Application       @relation(fields: [aidn], references: [aidn], onDelete: Cascade, onUpdate: Cascade)
+  aidn        Int
+  description String?
+  accounts    RolesOnAccounts[]
+  Permission  Permission[]
+}
+
+model RolesOnAccounts {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  account   Account  @relation(fields: [ksn], references: [ksn], onDelete: Cascade, onUpdate: Cascade)
+  ksn       Int
+  role      Role     @relation(fields: [rid], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rid       String
+}
+
+model Permission {
+  id          String      @id
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  application Application @relation(fields: [aidn], references: [aidn], onDelete: Cascade, onUpdate: Cascade)
+  aidn        Int
+  description String?
+  role        Role        @relation(fields: [rid], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rid         String
 }
 
 model Photo {

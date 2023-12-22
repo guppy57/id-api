@@ -1,6 +1,5 @@
 import { Request } from 'express';
-import { Scope } from '@nestjs/common';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import * as Sentry from '@sentry/node';
 import { Span, SpanContext } from '@sentry/types';
@@ -22,7 +21,7 @@ export class SentryService {
    *
    * @param request
    */
-  constructor(@Inject(REQUEST) private request: Request) {
+  constructor(@Inject(REQUEST) private readonly request: Request) {
     const { method, headers, url } = this.request;
 
     // recreate transaction based from HTTP request

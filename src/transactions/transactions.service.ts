@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Transaction } from '@prisma/client';
-
+import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import { UpdateWalletBalanceDto } from '../accounts/accounts.dto';
 import { AccountsService } from '../accounts/accounts.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -11,36 +11,40 @@ import logger from '../../utils/logger';
 
 @Injectable()
 export class TransactionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Inject(AccountsService)
   private readonly accounts: AccountsService;
 
   // creates a new transaction and updates account balance
-  async createTransaction(dto: CreateTransactionDto): Promise<IResponse> {
+  async createTransaction(
+    req: IAuthenticatedRequest,
+    dto: CreateTransactionDto,
+  ): Promise<IResponse> {
     let transaction: Transaction;
+    const ksn = req.kreativeAccount.ksn;
 
     try {
       // create a new transaction with prisma
-      logger.info(`prisma.transaction.create initiated`);
+      logger.info('prisma.transaction.create initiated');
       transaction = await this.prisma.transaction.create({
         data: {
+          ksn,
           aidn: dto.aidn,
-          ksn: dto.ksn,
           type: dto.type,
           amount: dto.amount,
         },
       });
     } catch (error) {
       // handle any prisma errors
-      logger.error({ message: `prisma.transaction.create failed`, error });
+      logger.error({ message: 'prisma.transaction.create failed', error });
       handlePrismaErrors(error);
     }
 
     // update wallet balance in the designated account
-    logger.info(`accounts.updateWalletBalance initiated for ksn: ${dto.ksn}`);
+    logger.info(`accounts.updateWalletBalance initiated for ksn: ${ksn}`);
     const newWalletbalance = await this.accounts.updateWalletBalance({
-      ksn: dto.ksn,
+      ksn: ksn,
       type: dto.type,
       amount: dto.amount,
     } satisfies UpdateWalletBalanceDto);
@@ -51,7 +55,7 @@ export class TransactionsService {
       data: { newWalletbalance, transaction },
     };
 
-    logger.info({ message: `create transaction succeeded`, payload });
+    logger.info({ message: 'create transaction succeeded', payload });
     return payload;
   }
 
@@ -67,7 +71,7 @@ export class TransactionsService {
       });
     } catch (error) {
       // handles any prisma errors
-      logger.error({ message: `prisma.transaction.findMany failed`, error });
+      logger.error({ message: 'prisma.transaction.findMany failed', error });
       handlePrismaErrors(error);
     }
 
@@ -77,7 +81,7 @@ export class TransactionsService {
       data: { transactions },
     };
 
-    logger.info({ message: `getTransactionsByAccount succeeded`, payload });
+    logger.info({ message: 'getTransactionsByAccount succeeded', payload });
     return payload;
   }
 }

@@ -5,6 +5,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PhotosModule } from '../photos/photos.module';
 import { ApplicationsModule } from '../applications/applications.module';
 import { AccountsService } from './accounts.service';
+import { RolesModule } from '../roles/roles.module';
 
 describe('Accounts Service', () => {
   let service: AccountsService;
@@ -18,6 +19,7 @@ describe('Accounts Service', () => {
         PrismaModule,
         PhotosModule,
         ApplicationsModule,
+        RolesModule,
       ],
     }).compile();
 

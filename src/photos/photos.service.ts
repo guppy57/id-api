@@ -21,7 +21,7 @@ const s3 = new S3({
 
 @Injectable()
 export class PhotosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async uploadPhotoFromFile(
     ksn: number,
@@ -152,7 +152,6 @@ export class PhotosService {
     };
   }
 
-  // TODO add pagination for this route as there will be a crap ton of photos
   async findAll(): Promise<IResponse> {
     let photos: Photo[];
 

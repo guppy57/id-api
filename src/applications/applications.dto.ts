@@ -26,7 +26,7 @@ export class NewApplicationDto {
 
   @IsNotEmpty()
   @IsString()
-  basePermission: string;
+  baseRole: string;
 
   logoUrl?: string;
   iconUrl?: string;
@@ -51,7 +51,7 @@ export class UpdateApplicationDto {
 
   @IsNotEmpty()
   @IsString()
-  basePermission: string;
+  baseRole: string;
 
   @IsNotEmpty()
   logoUrl: string;

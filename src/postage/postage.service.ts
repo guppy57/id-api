@@ -6,6 +6,7 @@ import loggedIn from './emails/loggedIn';
 import passwordChanged from './emails/passwordChanged';
 import resetCode from './emails/resetCode';
 import welcome from './emails/welcome';
+import verifyCode from './emails/verifyCode';
 
 import { PostageDto } from './postage.dto';
 import logger from '../../utils/logger';
@@ -25,7 +26,7 @@ const insertDataIntoHtml = (html: string, data: string[]): string => {
 
 @Injectable()
 export class PostageService {
-  async sendEmail(dto: PostageDto): Promise<void | boolean> {
+  async sendEmail(dto: PostageDto): Promise<boolean> {
     let rawHtml: string;
     let subjectLine: string;
 
@@ -47,14 +48,20 @@ export class PostageService {
         rawHtml = passwordChanged;
         subjectLine = 'Password Changed | Kreative';
         break;
+      case 'verify-code':
+        rawHtml = verifyCode;
+        subjectLine = 'Verify your email | Kreative';
+        break;
+      default:
+        throw new Error('Invalid template name');
     }
 
     const newHtml = insertDataIntoHtml(rawHtml, dto.data);
 
     // mailgun data for the email to be sent
     const mailgunData = {
-      from: dto.fromAddress || `"Kreative" <mailgun@mail.kreativeusa.com>`,
-      replyTo: dto.replyTo || 'armaan@kreativeusa.com',
+      from: dto.fromAddress ?? '"Kreative" <no-reply@mail.kreativeusa.com>',
+      replyTo: dto.replyTo ?? 'armaan@kreativeusa.com',
       to: dto.toAddress,
       subject: subjectLine,
       html: newHtml,
@@ -64,15 +71,17 @@ export class PostageService {
     mailgun.messages
       .create('mail.kreativeusa.com', mailgunData)
       .then((response: any) => {
-        logger.info({ message: `new email sent`, response });
+        logger.info({ message: 'new email sent', response });
         return true;
       })
       .catch((error: any) => {
         // handle any unknown error that comes up
         // we don't want to throw an exception because if sending an email doesn't work
         // the rest of the program should still continue to work
-        logger.error({ message: `new email send failed`, error });
+        logger.error({ message: 'new email send failed', error });
         return false;
       });
+
+    return false;
   }
 }

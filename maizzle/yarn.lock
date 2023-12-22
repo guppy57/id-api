@@ -45,6 +45,22 @@
     ora "^5.1.0"
     update-notifier "^5.0.1"
 
+"@maizzle/cli@^1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@maizzle/cli/-/cli-1.5.7.tgz#fe6ca62615dd9569a01b47835a852463cef0ee07"
+  integrity sha512-yxLCQ2SBKZ3pEdLtcE/QhocXPFHBWuP5xDrvK7UY9hvMfkfGLtWJ0pINw4Uw8nO++CNuNKlmRm9ciD62myuGbA==
+  dependencies:
+    chalk "^4.1.0"
+    commander "^11.0.0"
+    execa "^5.0.0"
+    fs-extra "^10.0.0"
+    import-cwd "^3.0.0"
+    inquirer "^8.0.0"
+    np "*"
+    ora "^5.1.0"
+    resolve-cwd "^3.0.0"
+    update-notifier "^5.0.1"
+
 "@maizzle/framework@latest":
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/@maizzle/framework/-/framework-4.3.1.tgz#4c3eb29f01e675e33814c6773f6607c555502629"
@@ -867,6 +883,11 @@ color-shorthand-hex-to-six-digit@^3.0.2:
     hex-color-regex "^1.1.0"
     lodash.clonedeep "^4.5.0"
     lodash.isplainobject "^4.0.6"
+
+commander@^11.0.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-11.1.0.tgz#62fdce76006a68e5c1ab3314dc92e800eb83d906"
+  integrity sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==
 
 commander@^2.19.0, commander@^2.2.0:
   version "2.20.3"

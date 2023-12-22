@@ -7,6 +7,7 @@ import { TransactionsService } from './transactions.service';
 import { KeychainsService } from '../keychains/keychains.service';
 import { PhotosService } from '../photos/photos.service';
 import { ApplicationsService } from '../applications/applications.service';
+import { RolesService } from '../roles/roles.service';
 
 describe('Transactions Controller', () => {
   let controller: TransactionsController;
@@ -22,6 +23,7 @@ describe('Transactions Controller', () => {
         KeychainsService,
         PhotosService,
         ApplicationsService,
+        RolesService,
       ],
     }).compile();
 

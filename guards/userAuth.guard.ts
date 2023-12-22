@@ -9,9 +9,12 @@ import { Observable } from 'rxjs';
 import axios, { AxiosResponse } from 'axios';
 import logger from '../utils/logger';
 import { IAuthenticatedRequest } from '../types/IAuthenticatedRequest';
+import { RolesOnAccounts } from '@prisma/client';
+import compareRoles from '../utils/compareRoles';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ?? 3000;
 
+// TODO: shouldn't these include any and all AIDNs that belong to Kreative?
 const AIDNs: number[] = [
   parseInt(process.env.HOST_AIDN),
   parseInt(process.env.MYKREATIVE_AIDN),
@@ -30,16 +33,16 @@ export class UserAuthGuard implements CanActivate {
 
   async validateRequest(req: IAuthenticatedRequest): Promise<boolean> {
     let axiosResponse: AxiosResponse<any, any>;
-    const key = req.headers['kreative_id_key'];
-    const aidn = parseInt(req.headers['kreative_aidn']);
-    const appchain = req.headers['kreative_appchain'];
+    const key = req.headers.kreative_id_key;
+    const aidn = parseInt(req.headers.kreative_aidn);
+    const appchain = process.env.APPCHAIN;
 
-    if (!key || !aidn || !appchain) {
+    if (!key || !aidn) {
       logger.warn(
         'authenticate user middleware sent 400 due to missing key, aidn',
       );
       throw new HttpException(
-        'key, aidn, or appchain missing in headers',
+        'key or aidn missing in headers',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -87,13 +90,16 @@ export class UserAuthGuard implements CanActivate {
 
     const payload = axiosResponse.data.data;
     const account: any = payload.account;
-    const userPermissions: string[] = account.permissions;
+    const userRoles: RolesOnAccounts[] = account.roles;
     const givenAidn = parseInt(payload.keychain.aidn);
 
-    if (!userPermissions.some((p) => this.permissions.includes(p))) {
+    logger.info('userAuth attempting to verify roles for user in userAuth');
+    const hasRoles: boolean = await compareRoles(userRoles, this.permissions);
+
+    if (!hasRoles) {
       logger.debug({
         message: 'userAuth sent 401',
-        userPermissions,
+        userRoles,
         requiredPermissions: this.permissions,
       });
       throw new HttpException(
@@ -115,6 +121,7 @@ export class UserAuthGuard implements CanActivate {
     }
 
     req.kreativeAccount = account;
+    req.requestingAIDN = givenAidn;
     logger.debug({ message: 'userAuth passed', account });
 
     return true;

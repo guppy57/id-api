@@ -16,30 +16,28 @@ import logger from '../../utils/logger';
 
 @Controller('keychains')
 export class KeychainsController {
-  constructor(private keychainService: KeychainsService) {}
+  constructor(private readonly keychainService: KeychainsService) {}
 
   @Get('')
   @HttpCode(HttpStatus.OK)
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN']))
   getAllKeychains() {
-    logger.info(`GET /keychains initiated`);
+    logger.info('GET /keychains initiated');
     return this.keychainService.getAllKeychains();
   }
 
-  @Post(':id/close')
+  @Post('close')
   @HttpCode(HttpStatus.OK)
-  closeKeychain(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: CloseKeychainDto,
-  ) {
-    logger.info(`POST /keychains/close initiated`);
-    return this.keychainService.closeKeychain(id, dto);
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  closeKeychain(@Body() key: string) {
+    logger.info('POST /keychains/close initiated');
+    return this.keychainService.closeKeychain(key);
   }
 
   @Post('verify')
   @HttpCode(HttpStatus.OK)
   verifyKeychain(@Body() dto: VerifyKeychainDto) {
-    logger.info({ message: `POST /keychains/verify initiated`, body: dto });
+    logger.info({ message: 'POST /keychains/verify initiated', body: dto });
     return this.keychainService.verifyKeychain(dto);
   }
 }

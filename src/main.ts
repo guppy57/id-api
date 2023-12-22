@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import logger from '../utils/logger';
 
 // the port that the id-api should boot on
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ?? 3000;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

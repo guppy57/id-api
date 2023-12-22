@@ -26,7 +26,7 @@ const SECRET = process.env.SUPER_SECRET;
 
 @Injectable({})
 export class KeychainsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // returns new keychain after being added to the database
   async createKeychain(dto: KeychainDto): Promise<Keychain> {
@@ -68,12 +68,12 @@ export class KeychainsService {
       });
     } catch (error) {
       // handles any errors by prisma
-      logger.error({ message: `prisma.keychain.create failed`, error });
+      logger.error({ message: 'prisma.keychain.create failed', error });
       handlePrismaErrors(error);
     }
 
     // returns just the jwt from the keychain object
-    logger.info({ message: `new keychain created successful`, key });
+    logger.info({ message: 'new keychain created successful', key });
     return keychain;
   }
 
@@ -83,11 +83,11 @@ export class KeychainsService {
 
     try {
       // gets all keychains with prisma
-      logger.info(`prisma.keychain.findMany initiated`);
+      logger.info('prisma.keychain.findMany initiated');
       keychains = await this.prisma.keychain.findMany();
     } catch (error) {
       // hanles any prisma errors
-      logger.error({ message: `prisma.keychain.findMany failed`, error });
+      logger.error({ message: 'prisma.keychain.findMany failed', error });
       handlePrismaErrors(error);
     }
 
@@ -97,7 +97,7 @@ export class KeychainsService {
       data: { keychains },
     };
 
-    logger.info({ message: `getAllKeychains succeeded`, payload });
+    logger.info({ message: 'getAllKeychains succeeded', payload });
     return payload;
   }
 
@@ -115,7 +115,7 @@ export class KeychainsService {
       // finds the keychain from the key
       // as one ksn may have many keys, we can't search from that
       logger.info({
-        message: `prisma.keychain.findUnique initiated with key`,
+        message: 'prisma.keychain.findUnique initiated with key',
         key: dto.key,
       });
       keychain = await this.prisma.keychain.findUnique({
@@ -123,20 +123,20 @@ export class KeychainsService {
       });
     } catch (error) {
       // handles any prisma errors
-      logger.error({ message: `prisma.keychain.findUnique failed`, error });
+      logger.error({ message: 'prisma.keychain.findUnique failed', error });
       handlePrismaErrors(error);
     }
 
     if (keychain === null) {
       // handles the case where the keychain itself is not found
       // this could be through an attack or an incorrectly typed in key
-      logger.error(`keychain not found in verify keychain`);
+      logger.error('keychain not found in verify keychain');
       throw new NotFoundException('keychain not found');
     }
 
     // checks the expiration field
     if (keychain.expired) {
-      logger.info(`keychain found to be expired`);
+      logger.info('keychain found to be expired');
       throw new UnauthorizedException('keychain has expired from field');
     }
 
@@ -144,10 +144,10 @@ export class KeychainsService {
     jwt.verify(keychain.key, SECRET, (error: any, decoded: any) => {
       // throws error if the key somehow uses the 'wrong' token
       if (error) {
-        logger.error(`jwt.verify is using WRONG token for decoding`);
+        logger.error('jwt.verify is using WRONG token for decoding');
         throw new NotFoundException();
       }
-      logger.info(`jwt.verify passed successful and key was decoded`);
+      logger.info('jwt.verify passed successful and key was decoded');
       decodedKey = decoded;
     });
 
@@ -157,7 +157,7 @@ export class KeychainsService {
     );
 
     if (expired) {
-      logger.debug(`keychain is expired within it's payload`);
+      logger.debug('keychain is expired within its payload');
       try {
         // update the keychain's expired field to also reflect true
         logger.info(`prisma.keychain.update initiated for id: ${keychain.id}`);
@@ -167,12 +167,12 @@ export class KeychainsService {
         });
       } catch (error) {
         // handles all prisma errors
-        logger.error({ message: `prisma.keychain.update failed`, error });
+        logger.error({ message: 'prisma.keychain.update failed', error });
         handlePrismaErrors(error);
       }
 
       // throw error to kill the process and return failed verification
-      logger.error(`UnauthorizedException thrown since keychain is expired`);
+      logger.error('UnauthorizedException thrown since keychain is expired');
       throw new UnauthorizedException('keychain has expired from payload');
     }
 
@@ -187,7 +187,7 @@ export class KeychainsService {
     // removes expired, the jwt from the keychain object
     // it doesn't seem like there would be any reason to send the key back to the client
     // as they already have a copy of it that IS valid and not expired
-    logger.info(`sensitive info for keychain being deleted`);
+    logger.info('sensitive info for keychain being deleted');
     delete keychain.key;
     delete keychain.expired;
 
@@ -202,20 +202,23 @@ export class KeychainsService {
       );
       account = await this.prisma.account.findUnique({
         where: { ksn: keychain.ksn },
+        include: {
+          roles: true,
+        },
       });
     } catch (error) {
       // handles prisma errors
-      logger.error({ message: `prisma.account.findUnique failed`, error });
+      logger.error({ message: 'prisma.account.findUnique failed', error });
       handlePrismaErrors(error);
     }
 
     if (account === null || account === undefined) {
-      logger.error(`no account was found on keychain`);
+      logger.error('no account was found on keychain');
       throw new NotFoundException('Account not found');
     }
 
     // removes sensitive information
-    logger.info(`sensitive info for account being deleted`);
+    logger.info('sensitive info for account being deleted');
     delete account.bpassword;
     delete account.resetCode;
 
@@ -228,27 +231,23 @@ export class KeychainsService {
       },
     };
 
-    logger.info({ message: `verify keychain succeeded`, payload });
+    logger.info({ message: 'verify keychain succeeded', payload });
     return payload;
   }
 
   // expires the keychain
-  async closeKeychain(id: number, dto: CloseKeychainDto): Promise<IResponse> {
+  async closeKeychain(key: string): Promise<IResponse> {
     let keychain: any;
 
-    // verifies the appchain sent through the body
-    // this method will throw errors if the appchain is not verified
-    await verifyAppchain(dto.aidn, dto.appchain);
-
     try {
-      logger.info(`prisma.keychain.update initiated for close keychain: ${id}`);
-      keychain = await this.prisma.keychain.update({
-        where: { id },
+      logger.info(`prisma.keychain.update initiated for key: ${key}`);
+      keychain = await this.prisma.keychain.updateMany({
+        where: { key },
         data: { expired: true },
       });
     } catch (error) {
       // handles any prisma errors that come up
-      logger.error({ message: `prisma.keychain.update failed`, error });
+      logger.error({ message: 'prisma.keychain.update failed', error });
       handlePrismaErrors(error);
     }
 
@@ -258,12 +257,12 @@ export class KeychainsService {
         message: 'Keychain closed',
       };
 
-      logger.info({ message: `close keychain passed`, payload });
+      logger.info({ message: 'close keychain passed', payload });
       return payload;
     } else {
       // for some reason the keychain doesn't return from prisma
-      logger.error(`keychain not returning from prisma`);
-      throw new InternalServerErrorException(`Close keychain failed`);
+      logger.error('keychain not returning from prisma');
+      throw new InternalServerErrorException('Close keychain failed');
     }
   }
 }

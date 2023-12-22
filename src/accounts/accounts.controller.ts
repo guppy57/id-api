@@ -16,7 +16,6 @@ import {
   VerifyCodeDto,
   ResetPasswordDto,
   SendCodeDto,
-  UpdatePermissionsDto,
   UpdateAvatarDto,
 } from './accounts.dto';
 import logger from '../../utils/logger';
@@ -26,17 +25,17 @@ import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Controller('accounts')
 export class AccountsController {
-  constructor(private accountsService: AccountsService) {}
+  constructor(private readonly accountsService: AccountsService) {}
 
   @Post('signup')
   signup(@Body() dto: SignupDto): Promise<IResponse> {
-    logger.info({ message: `POST /accounts/signup initiated`, body: dto });
+    logger.info({ message: 'POST /accounts/signup initiated', body: dto });
     return this.accountsService.signup(dto);
   }
 
   @Post('signin')
   signin(@Body() dto: SigninDto): Promise<IResponse> {
-    logger.info({ message: `POST /accounts/signin initiated`, body: dto });
+    logger.info({ message: 'POST /accounts/signin initiated', body: dto });
     return this.accountsService.signin(dto);
   }
 
@@ -46,7 +45,7 @@ export class AccountsController {
     @Req() req: IAuthenticatedRequest,
     @Body() dto: UpdateAccountDto,
   ): Promise<IResponse> {
-    logger.info({ message: `POST /accounts/update initiated`, body: dto });
+    logger.info({ message: 'POST /accounts/update initiated', body: dto });
     return this.accountsService.updateAccount(req, dto);
   }
 
@@ -57,32 +56,23 @@ export class AccountsController {
     @Body() dto: UpdateAvatarDto,
   ): Promise<IResponse> {
     logger.info({
-      message: `POST /accounts/update/avatar initiated`,
+      message: 'POST /accounts/update/avatar initiated',
       body: dto,
     });
     return this.accountsService.updateAvatar(req, dto);
   }
 
-  @Post('update/permissions')
+  @Get('')
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
-  updatePermissions(@Body() dto: UpdatePermissionsDto): Promise<IResponse> {
-    logger.info({
-      message: `POST /accounts/update/permissions initiated`,
-      body: dto,
-    });
-    return this.accountsService.updatePermissions(dto);
-  }
-
-  @Get(':ksn')
-  getAccount(@Param('ksn', ParseIntPipe) ksn: number): Promise<IResponse> {
-    logger.info(`GET /accounts/${ksn} initiated`);
-    return this.accountsService.getAccount(ksn);
+  getAccount(@Req() req: IAuthenticatedRequest): Promise<IResponse> {
+    logger.info(`GET /accounts initiated`);
+    return this.accountsService.getAccount(req);
   }
 
   @Post('resetCode/send')
   async sendResetCode(@Body() dto: SendCodeDto): Promise<IResponse> {
     logger.info({
-      message: `POST /accounts/resetCode/send initiated`,
+      message: 'POST /accounts/resetCode/send initiated',
       body: dto,
     });
     return this.accountsService.sendResetCode(dto);
@@ -110,5 +100,28 @@ export class AccountsController {
       body: dto,
     });
     return this.accountsService.resetPassword(ksn, dto);
+  }
+
+  @Post('verify_code/send')
+  async sendEmailVerificationCode(
+    @Body() dto: SendCodeDto,
+  ): Promise<IResponse> {
+    logger.info({
+      message: 'POST /accounts/verify_code/send initiated',
+      body: dto,
+    });
+    return this.accountsService.sendEmailVerificationCode(dto.email);
+  }
+
+  @Post(':ksn/verify_code/verify')
+  async verifyEmailVerificationCode(
+    @Param('ksn', ParseIntPipe) ksn: number,
+    @Body() dto: VerifyCodeDto,
+  ): Promise<IResponse> {
+    logger.info({
+      message: `POST /accounts/${ksn}/verify_code/verify initiated`,
+      body: dto,
+    });
+    return this.accountsService.verifyEmailVerificationCode(ksn, dto.code);
   }
 }
