@@ -30,9 +30,7 @@ export class VerifyKeychainDto {
   @IsString()
   key: string;
 
-  @IsNotEmpty()
-  @IsString()
-  appchain: string;
+  appchain?: string;
 }
 
 export class CloseKeychainDto {

@@ -7,12 +7,14 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { VerifyKeychainDto, CloseKeychainDto } from './keychains.dto';
 import { KeychainsService } from './keychains.service';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
 import logger from '../../utils/logger';
+import { Request } from 'express';
 
 @Controller('keychains')
 export class KeychainsController {
@@ -36,8 +38,20 @@ export class KeychainsController {
 
   @Post('verify')
   @HttpCode(HttpStatus.OK)
-  verifyKeychain(@Body() dto: VerifyKeychainDto) {
-    logger.info({ message: 'POST /keychains/verify initiated', body: dto });
+  verifyKeychain(@Body() dto: VerifyKeychainDto, @Req() req: Request) {
+    logger.info({
+      message: 'POST /keychains/verify initiated',
+      body: dto,
+      req,
+    });
+
+    if (
+      req.originalUrl.includes('id.kreativeusa.com') ||
+      req.originalUrl === '/v1/keychains/verify'
+    ) {
+      dto.appchain = process.env.KREATIVE_APPCHAIN;
+    }
+
     return this.keychainService.verifyKeychain(dto);
   }
 }
