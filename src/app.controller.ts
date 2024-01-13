@@ -1,22 +1,12 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
   HttpCode,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import wretch from 'wretch';
+
 import logger from '../utils/logger';
-
-const PORT = process.env.PORT || 3000;
-const APPCHAIN = process.env.APPCHAIN;
-
-class VerifyCodeDto {
-  key: string;
-  aidn: number;
-}
 
 @Controller('')
 export class AppController {
