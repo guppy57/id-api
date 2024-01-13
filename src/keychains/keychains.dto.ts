@@ -35,11 +35,6 @@ export class VerifyKeychainDto {
 
 export class CloseKeychainDto {
   @IsNotEmpty()
-  @IsNumber()
-  @Min(6)
-  aidn: number;
-
-  @IsNotEmpty()
   @IsString()
-  appchain: string;
+  key: string;
 }

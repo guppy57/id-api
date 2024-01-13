@@ -12,11 +12,7 @@ import * as jwt from 'jsonwebtoken';
 import { PrismaService } from '../prisma/prisma.service';
 import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
 import { verifyAppchain } from '../../utils/verifyAppchain';
-import {
-  KeychainDto,
-  VerifyKeychainDto,
-  CloseKeychainDto,
-} from './keychains.dto';
+import { KeychainDto, VerifyKeychainDto } from './keychains.dto';
 import { IResponse } from 'types/IResponse';
 import * as moment from 'moment';
 import { Moment } from 'moment';
@@ -239,13 +235,16 @@ export class KeychainsService {
   async closeKeychain(key: string): Promise<IResponse> {
     let keychain: any;
 
+    console.log(key);
+
     try {
       logger.info(`prisma.keychain.update initiated for key: ${key}`);
-      keychain = await this.prisma.keychain.updateMany({
+      keychain = await this.prisma.keychain.update({
         where: { key },
         data: { expired: true },
       });
     } catch (error) {
+      console.log(error);
       // handles any prisma errors that come up
       logger.error({ message: 'prisma.keychain.update failed', error });
       handlePrismaErrors(error);
