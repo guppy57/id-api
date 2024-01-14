@@ -40,12 +40,11 @@ export class ApplicationsController {
   @Get(':aidn')
   @UseGuards(new UserAuthGuard(['KREATIVE_ID_ADMIN', 'KREATIVE_ID_DEVELOPER']))
   async getApplication(
-    @Req() req: IAuthenticatedRequest,
     @Param('aidn', ParseIntPipe) aidn: number,
     @Query() query?: { verbose: string },
   ): Promise<IResponse> {
     logger.info(`GET /applications/${aidn} initiated`);
-    return this.applicationsService.getOneApplication(req, aidn, query);
+    return this.applicationsService.getOneApplication(aidn, query);
   }
 
   @Get(':aidn/basic')

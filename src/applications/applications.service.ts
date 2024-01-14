@@ -123,7 +123,6 @@ export class ApplicationsService {
   // retrieves information for a single applicaiton by AIDN
   // this route is used by Kreative ID Admin and sends back ALL the information for an application
   async getOneApplication(
-    req: IAuthenticatedRequest,
     aidn: number,
     query?: { verbose: string },
   ): Promise<IResponse> {
