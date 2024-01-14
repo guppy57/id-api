@@ -1,5 +1,4 @@
 import {
-  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -58,10 +57,6 @@ export class UpdateApplicationDto {
 
   @IsNotEmpty()
   iconUrl: string;
-
-  @IsNotEmpty()
-  @IsBoolean()
-  refreshAppchain: boolean;
 }
 
 export class AidnDto {
@@ -69,10 +64,4 @@ export class AidnDto {
   @IsNumber()
   @Min(6)
   aidn: number;
-}
-
-export class VerifyAppchainDto {
-  @IsNotEmpty()
-  @IsString()
-  appchain: string;
 }

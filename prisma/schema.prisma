@@ -69,7 +69,6 @@ model Application {
   updatedAt    DateTime      @updatedAt
   name         String
   callbackUrl  String        @default("#")
-  appchain     String        @unique
   homepage     String        @default("#")
   description  String        @default("#")
   logoUrl      String        @default("#")

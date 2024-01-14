@@ -14,11 +14,7 @@ import { Request } from 'express';
 import { IResponse } from 'types/IResponse';
 import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import { IApplication } from 'types/IApplication';
-import {
-  NewApplicationDto,
-  UpdateApplicationDto,
-  VerifyAppchainDto,
-} from './applications.dto';
+import { NewApplicationDto, UpdateApplicationDto } from './applications.dto';
 import { ApplicationsService } from './applications.service';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
 import logger from '../../utils/logger';
@@ -105,14 +101,5 @@ export class ApplicationsController {
   ): Promise<IResponse> {
     logger.info(`DELETE /applications/${aidn} initiated`);
     return this.applicationsService.deleteApplication(aidn);
-  }
-
-  @Post(':aidn/appchain/verify')
-  async verifyAppchain(
-    @Param('aidn', ParseIntPipe) aidn: number,
-    @Body() dto: VerifyAppchainDto,
-  ): Promise<IResponse> {
-    logger.info('POST /applications/:aidn/appchain/verify initiated');
-    return this.applicationsService.verifyAppchain(aidn, dto);
   }
 }

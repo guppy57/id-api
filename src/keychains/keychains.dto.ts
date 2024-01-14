@@ -29,8 +29,6 @@ export class VerifyKeychainDto {
   @IsNotEmpty()
   @IsString()
   key: string;
-
-  appchain?: string;
 }
 
 export class CloseKeychainDto {
