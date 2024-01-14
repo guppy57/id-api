@@ -4,7 +4,6 @@ export interface IApplication {
   updatedAt: Date;
   name: string;
   callbackUrl: string;
-  appchain?: string;
   homepage: string;
   description: string;
   logoUrl: string;

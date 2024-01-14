@@ -1,22 +1,13 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import { Application, Keychain } from '@prisma/client';
-import { customAlphabet, nanoid } from 'nanoid';
+import { customAlphabet } from 'nanoid';
 import { PrismaService } from '../prisma/prisma.service';
 import { IResponse } from '../../types/IResponse';
 import { IApplication } from '../../types/IApplication';
 import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
-import {
-  NewApplicationDto,
-  UpdateApplicationDto,
-  VerifyAppchainDto,
-} from './applications.dto';
+import { NewApplicationDto, UpdateApplicationDto } from './applications.dto';
 import logger from '../../utils/logger';
-import { verifyAppchain } from '../../utils/verifyAppchain';
 
 @Injectable()
 export class ApplicationsService {
@@ -42,26 +33,6 @@ export class ApplicationsService {
 
     logger.info(`new aidn ${newAIDN} generated`);
     return newAIDN;
-  }
-
-  // creates a new, unique long appchain string
-  async generateAppchain(): Promise<string> {
-    let unique = false;
-    // creates a new 'nanoid' function with default parameters
-    const newAppchain: string = nanoid();
-    // loop to create a completely unique appchain
-    while (!unique) {
-      logger.info(
-        'prisma.application.findUnique in generateAppchain initiated',
-      );
-      const application = await this.prisma.application.findUnique({
-        where: { appchain: newAppchain },
-      });
-      if (application === null) unique = true;
-    }
-
-    logger.info(`new appchain ${newAppchain} generated`);
-    return newAppchain;
   }
 
   async getBaseRole(aidn: number): Promise<string> {
@@ -90,9 +61,6 @@ export class ApplicationsService {
     // generate a new AIDN
     const aidn: number = await this.generateAIDN();
 
-    // generate a new appchain
-    const appchain: string = await this.generateAppchain();
-
     try {
       // create new application with prisma
       logger.info(`prisma.application.create initiated with aidn: ${aidn}`);
@@ -104,7 +72,6 @@ export class ApplicationsService {
           logoUrl: dto.logoUrl ?? '#',
           iconUrl: dto.iconUrl ?? '#',
           baseRole: dto.baseRole,
-          appchain,
           name: dto.name,
           aidn,
         },
@@ -189,15 +156,6 @@ export class ApplicationsService {
 
     // executes 'verbose' option in url parameter on get one application query
     if ((query !== undefined ?? true) && query.verbose === 'true') {
-      // verify the appchain since only Kreative services should be able to get stats
-      // verifies the appchain sent through the body
-      // this method will throw errors if the appchain is not verified
-      const reqAppchain = req.headers.kreative_appchain as string;
-      const reqAidn: string = req.headers.kreative_aidn as string;
-      const parsedAidn: number = parseInt(reqAidn);
-
-      await verifyAppchain(parsedAidn, reqAppchain);
-
       // setup variables for the different statistics we need to find
       // these are all the stats that will eventually be initialized
       let totalOpenKeychains: number;
@@ -365,9 +323,6 @@ export class ApplicationsService {
       throw new NotFoundException('Application not found');
     }
 
-    // removes sensitive data from application
-    delete application.appchain;
-
     logger.info({
       message: `getOneApplicationBasic succeeded with aidn: ${aidn}`,
       application,
@@ -381,50 +336,21 @@ export class ApplicationsService {
     dto: UpdateApplicationDto,
   ): Promise<IResponse> {
     let applicationChange: any;
-    let newAppchain: string;
-
-    if (dto.refreshAppchain) {
-      logger.info(`refreshing appchain for aidn: ${aidn}`);
-      newAppchain = await this.generateAppchain();
-    }
 
     try {
-      if (dto.refreshAppchain) {
-        // updates the application with a new appchain
-        logger.info(
-          `prisma.application.update initiated with aidn: ${aidn}, with new appchain`,
-        );
-        applicationChange = await this.prisma.application.update({
-          where: { aidn },
-          data: {
-            baseRole: dto.baseRole,
-            name: dto.name,
-            callbackUrl: dto.callbackUrl,
-            homepage: dto.homepage,
-            description: dto.description,
-            logoUrl: dto.logoUrl,
-            iconUrl: dto.iconUrl,
-            appchain: newAppchain,
-          },
-        });
-      } else {
-        // updates the application without a new appchain
-        logger.info(
-          `prisma.application.update initiated with aidn: ${aidn}, no new appchain`,
-        );
-        applicationChange = await this.prisma.application.update({
-          where: { aidn },
-          data: {
-            baseRole: dto.baseRole,
-            name: dto.name,
-            callbackUrl: dto.callbackUrl,
-            homepage: dto.homepage,
-            description: dto.description,
-            logoUrl: dto.logoUrl,
-            iconUrl: dto.iconUrl,
-          },
-        });
-      }
+      logger.info(`prisma.application.update initiated with aidn: ${aidn}`);
+      applicationChange = await this.prisma.application.update({
+        where: { aidn },
+        data: {
+          baseRole: dto.baseRole,
+          name: dto.name,
+          callbackUrl: dto.callbackUrl,
+          homepage: dto.homepage,
+          description: dto.description,
+          logoUrl: dto.logoUrl,
+          iconUrl: dto.iconUrl,
+        },
+      });
     } catch (error) {
       // handle any prisma errors
       logger.error({
@@ -474,56 +400,6 @@ export class ApplicationsService {
 
     logger.info({
       message: `deleteApplication succeeded with aidn: ${aidn}`,
-      payload,
-    });
-    return payload;
-  }
-
-  async verifyAppchain(
-    aidn: number,
-    dto: VerifyAppchainDto,
-  ): Promise<IResponse> {
-    let application: Application;
-
-    try {
-      // gets one application from given aidn
-      logger.info(
-        `prisma.application.findUnique initiated with appchain: ${aidn}`,
-      );
-      application = await this.prisma.application.findUnique({
-        where: { aidn },
-      });
-    } catch (error) {
-      // handle any prisma errors that come up
-      logger.error({
-        message: `prisma.application.findUnique in verifyAppchain with aidn: ${aidn} failed`,
-        error,
-      });
-      handlePrismaErrors(error);
-    }
-
-    if (application === null || application === undefined) {
-      // no application was found with the aidn that was passed
-      // this behavior should not happen with actual clients as no unknown aidn should exist
-      logger.warn(`no application found with aidn: ${aidn}`);
-      throw new NotFoundException('Application not found in verifyAppchain');
-    }
-
-    if (application.appchain !== dto.appchain) {
-      throw new ForbiddenException('Appchain mismatch');
-    }
-
-    // removes sensitive data from application
-    delete application.appchain;
-
-    const payload: IResponse = {
-      statusCode: 200,
-      message: 'Appchain verified',
-      data: { application },
-    };
-
-    logger.info({
-      message: `verifyAppchain succeeded with aidn: ${aidn}`,
       payload,
     });
     return payload;
