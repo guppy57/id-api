@@ -1,10 +1,4 @@
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  IsUrl,
-  Min,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsUrl, Min } from 'class-validator';
 
 export class NewApplicationDto {
   @IsNotEmpty()
