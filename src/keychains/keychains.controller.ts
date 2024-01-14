@@ -38,19 +38,11 @@ export class KeychainsController {
 
   @Post('verify')
   @HttpCode(HttpStatus.OK)
-  verifyKeychain(@Body() dto: VerifyKeychainDto, @Req() req: Request) {
+  verifyKeychain(@Body() dto: VerifyKeychainDto) {
     logger.info({
       message: 'POST /keychains/verify initiated',
       body: dto,
-      req,
     });
-
-    if (
-      req.originalUrl.includes('id.kreativeusa.com') ||
-      req.originalUrl === '/v1/keychains/verify'
-    ) {
-      dto.appchain = process.env.KREATIVE_APPCHAIN;
-    }
 
     return this.keychainService.verifyKeychain(dto);
   }

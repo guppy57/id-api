@@ -8,10 +8,8 @@ import {
 import { Account, Keychain } from '@prisma/client';
 import { nanoid } from 'nanoid';
 import * as jwt from 'jsonwebtoken';
-
 import { PrismaService } from '../prisma/prisma.service';
 import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
-import { verifyAppchain } from '../../utils/verifyAppchain';
 import { KeychainDto, VerifyKeychainDto } from './keychains.dto';
 import { IResponse } from 'types/IResponse';
 import * as moment from 'moment';
@@ -102,10 +100,6 @@ export class KeychainsService {
   async verifyKeychain(dto: VerifyKeychainDto): Promise<IResponse> {
     let keychain: Keychain;
     let decodedKey: any;
-
-    // verifies the appchain sent through the body
-    // this method will throw errors if the appchain is not verified
-    await verifyAppchain(dto.aidn, dto.appchain);
 
     try {
       // finds the keychain from the key
