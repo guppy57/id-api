@@ -201,10 +201,10 @@ export class AccountsService {
       account = await this.prisma.account.create({
         data: {
           profilePicture: photoUrl,
-          email: dto.email,
+          email: dto.email.toLowerCase(),
           firstName: firstName,
           lastName: lastName,
-          username: dto.username,
+          username: dto.username.toLowerCase(),
           bpassword,
           ksn,
         },
@@ -287,7 +287,7 @@ export class AccountsService {
         `prisma.account.findUniqueOrThrow initiated for ${dto.email}`,
       );
       account = await this.prisma.account.findUniqueOrThrow({
-        where: { email: dto.email },
+        where: { email: dto.email.toLowerCase() },
         include: {
           roles: true,
         },
