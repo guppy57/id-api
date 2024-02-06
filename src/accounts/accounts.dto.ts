@@ -92,7 +92,6 @@ export class UpdateWalletBalanceDto {
 
 export class UpdateAvatarDto {
   @IsNotEmpty()
-  @IsUrl()
   photoUrl: string;
 }
 

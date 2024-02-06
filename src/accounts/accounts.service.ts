@@ -1,5 +1,6 @@
 
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -485,6 +486,13 @@ export class AccountsService {
     dto: UpdateAvatarDto,
   ): Promise<IResponse> {
     let account: any;
+
+    if (dto.photoUrl.substring(0, 8) !== 'https://') {
+      logger.error(
+        `photoUrl ${dto.photoUrl} is not a valid url for ${req.kreativeAccount.email}`,
+      );
+      throw new BadRequestException('photoUrl is not a valid url');
+    }
 
     try {
       // update account details and returns update
