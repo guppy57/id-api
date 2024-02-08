@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsEmail,
   IsNotEmpty,
@@ -116,4 +117,10 @@ export class ResetPasswordDto {
   @IsNumber()
   @Min(6)
   resetCode: number;
+}
+
+export class AccountListDto {
+  @IsArray()
+  @IsNotEmpty()
+  ksnList: number[];
 }

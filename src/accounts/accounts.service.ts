@@ -575,6 +575,58 @@ export class AccountsService {
     }
   }
 
+  async getAccountList(ksnList: number[]): Promise<IResponse> {
+    let accounts: Account[];
+
+    try {
+      logger.info(
+        `prisma.account.findMany for ${ksnList} in getAccountList initiated`,
+      );
+      accounts = await this.prisma.account.findMany({
+        where: {
+          ksn: {
+            in: ksnList,
+          },
+        },
+      });
+    } catch (error) {
+      // handles prisma errors
+      logger.error({
+        message: `prisma.account.findMany for ${ksnList} in getAccountList failed`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    if (accounts === null || accounts === undefined) {
+      // this error should only be thrown in development as in production
+      // only valid and open ksn's should be sent
+      logger.warn(`getAccountList not finding an account for ${ksnList}`);
+      throw new NotFoundException('Account not found');
+    } else {
+      // removes sensitive information
+      accounts.forEach((account) => {
+        delete account.bpassword;
+        delete account.resetCode;
+        delete account.verifyCode;
+      });
+      logger.info(`sensitive info for ${ksnList} removed`);
+
+      // returns account details
+      const payload: IResponse = {
+        statusCode: 200,
+        message: 'Account found',
+        data: accounts,
+      };
+
+      logger.info({
+        message: `getAccountList for ${ksnList} succeeded`,
+        payload,
+      });
+      return payload;
+    }
+  }
+
   // creates a new reset code for the account and sends it
   async sendResetCode(dto: SendCodeDto): Promise<IResponse> {
     let accountChange: any;

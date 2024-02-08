@@ -21,6 +21,7 @@ async function bootstrap() {
       'https://localhost:3000',
       'http://id.kreativeusa.com',
       'https://id.kreativeusa.com',
+      'https://*.kreativeusa.com',
       'http://kreativehyperlink.com',
       'https://kreativehyperlink.com',
       'http://api.kreativehyperlink.com',

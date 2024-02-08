@@ -17,15 +17,18 @@ import {
   ResetPasswordDto,
   SendCodeDto,
   UpdateAvatarDto,
+  AccountListDto,
 } from './accounts.dto';
 import logger from '../../utils/logger';
 import { IResponse } from '../../types/IResponse';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
+import { AppAuthGaurd } from 'guards/appAuth.guard';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
+import { IAppRequest } from 'types/IAppRequest';
 
 @Controller('accounts')
 export class AccountsController {
-  constructor(private readonly accountsService: AccountsService) {}
+  constructor(private readonly accountsService: AccountsService) { }
 
   @Post('signup')
   signup(@Body() dto: SignupDto): Promise<IResponse> {
@@ -67,6 +70,13 @@ export class AccountsController {
   getAccount(@Req() req: IAuthenticatedRequest): Promise<IResponse> {
     logger.info(`GET /accounts initiated`);
     return this.accountsService.getAccount(req);
+  }
+
+  @Get('list')
+  @UseGuards(new AppAuthGaurd())
+  getAccounts(@Body() body: AccountListDto): Promise<IResponse> {
+    logger.info(`GET /accounts/list initiated`);
+    return this.accountsService.getAccountList(body.ksnList);
   }
 
   @Post('resetCode/send')

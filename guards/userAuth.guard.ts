@@ -14,7 +14,6 @@ import compareRoles from '../utils/compareRoles';
 
 const PORT = process.env.PORT ?? 3000;
 
-// TODO: shouldn't these include any and all AIDNs that belong to Kreative?
 const AIDNs: number[] = [
   parseInt(process.env.HOST_AIDN),
   parseInt(process.env.MYKREATIVE_AIDN),
