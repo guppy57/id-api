@@ -31,7 +31,7 @@ export class AppAuthGaurd implements CanActivate {
       );
     }
 
-    if (process.env.APPCHAIN !== givenAppchain) {
+    if (process.env.KREATIVE_APPCHAIN !== givenAppchain) {
       logger.warn(
         'authenticate app middleware sent 401 due to invalid appchain',
       );
