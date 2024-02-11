@@ -24,7 +24,6 @@ import { IResponse } from '../../types/IResponse';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
 import { AppAuthGaurd } from 'guards/appAuth.guard';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
-import { IAppRequest } from 'types/IAppRequest';
 
 @Controller('accounts')
 export class AccountsController {
