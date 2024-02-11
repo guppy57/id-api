@@ -71,7 +71,7 @@ export class AccountsController {
     return this.accountsService.getAccount(req);
   }
 
-  @Get('list')
+  @Post('list')
   @UseGuards(new AppAuthGaurd())
   getAccounts(@Body() body: AccountListDto): Promise<IResponse> {
     logger.info(`GET /accounts/list initiated`);
