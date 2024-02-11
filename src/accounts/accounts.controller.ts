@@ -22,7 +22,7 @@ import {
 import logger from '../../utils/logger';
 import { IResponse } from '../../types/IResponse';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
-import { AppAuthGaurd } from 'guards/appAuth.guard';
+import { AppAuthGaurd } from '../../guards/appAuth.guard';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Controller('accounts')
