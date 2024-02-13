@@ -13,7 +13,7 @@ import logger from '../../utils/logger';
 
 @Controller('roles')
 export class RolesController {
-  constructor(private readonly rolesService: RolesService) { }
+  constructor(private readonly rolesService: RolesService) {}
 
   // remove a role from a user
   @Delete('')
