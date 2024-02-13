@@ -1,5 +1,7 @@
-import { Controller, UseGuards, Post, Body, Req } from '@nestjs/common';
+import { Controller, UseGuards, Post, Delete, Body, Req } from '@nestjs/common';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
+import { AppAuthGaurd } from '../../guards/appAuth.guard';
+import { RolesOnAccounts } from '@prisma/client';
 import { RolesService } from './roles.service';
 import { IResponse } from '../../types/IResponse';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
@@ -11,31 +13,28 @@ import logger from '../../utils/logger';
 
 @Controller('roles')
 export class RolesController {
-  constructor(private readonly rolesService: RolesService) {}
+  constructor(private readonly rolesService: RolesService) { }
 
   // remove a role from a user
-  @Post('remove')
-  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  @Delete('')
+  @UseGuards(new AppAuthGaurd())
   async removeRole(
-    @Req() req: IAuthenticatedRequest,
     @Body('role') role: string,
+    @Body('ksn') ksn: number,
   ): Promise<IResponse> {
     logger.info('POST /roles/remove initiated');
-    const ksn = req.kreativeAccount.ksn;
     return this.rolesService.removeRoleForUser(ksn, role);
   }
 
   // attach roles to a user
-  @Post('add')
-  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  @Post('')
+  @UseGuards(new AppAuthGaurd())
   async addRole(
-    @Req() req: IAuthenticatedRequest,
     @Body('roles') roles: string[],
+    @Body('ksn') ksn: number,
   ): Promise<IResponse> {
     logger.info('POST /roles/add initiated');
-    const ksn = req.kreativeAccount.ksn;
-    const existingRoles = req.kreativeAccount.roles;
-    return this.rolesService.addRolesForUser(ksn, roles, existingRoles);
+    return this.rolesService.addRolesForUser(ksn, roles);
   }
 
   // verify that a user has a specific role

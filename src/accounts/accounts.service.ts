@@ -221,7 +221,7 @@ export class AccountsService {
 
     // adds the base permission to the account
     const roles = ['KREATIVE_ID_USER', baseRole];
-    await this.roles.addRolesForUser(ksn, roles, []);
+    await this.roles.addRolesForUser(ksn, roles);
 
     // removes sensitive information from account object
     delete account.bpassword;
@@ -324,7 +324,7 @@ export class AccountsService {
 
     // update user roles if needed
     const baseRole = await this.applications.getBaseRole(dto.aidn);
-    await this.roles.addRolesForUser(account.ksn, [baseRole], account.roles);
+    await this.roles.addRolesForUser(account.ksn, [baseRole]);
 
     // sets up data for new Keychain with the keychain dto
     const keychainData: KeychainDto = {

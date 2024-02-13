@@ -43,15 +43,28 @@ export class RolesService {
     } as IResponse;
   }
 
-  async addRolesForUser(
-    ksn: number,
-    roles: string[],
-    existingRoles: RolesOnAccounts[],
-  ): Promise<IResponse> {
+  async addRolesForUser(ksn: number, roles: string[]): Promise<IResponse> {
     logger.info('rolesService.addRolesForUser initiated', {
       ksn,
       roles,
     });
+
+    let existingRoles: RolesOnAccounts[];
+
+    try {
+      logger.info(`prisma.rolesOnAccounts.findMany initiated for ${ksn}`);
+      existingRoles = await this.prisma.rolesOnAccounts.findMany({
+        where: {
+          ksn,
+        },
+      });
+    } catch (error) {
+      logger.error({
+        message: `prisma.rolesOnAccounts.findMany failed for ${ksn} & ${roles}: ${error.message}`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
 
     console.log(roles);
     console.log(existingRoles);
