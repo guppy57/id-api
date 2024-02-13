@@ -37,7 +37,7 @@ import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Injectable({})
 export class AccountsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   @Inject(PostageService)
   private readonly postage: PostageService;
@@ -587,6 +587,9 @@ export class AccountsService {
           ksn: {
             in: ksnList,
           },
+        },
+        include: {
+          roles: true,
         },
       });
     } catch (error) {
