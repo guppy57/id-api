@@ -10,10 +10,10 @@ import compareRoles from '../../utils/compareRoles';
 export class RolesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async removeRoleForUser(ksn: number, role: string): Promise<IResponse> {
+  async removeRoleForUser(ksn: number, roles: string[]): Promise<IResponse> {
     logger.info('rolesService.removeRoleForUser initiated', {
       ksn,
-      role,
+      roles,
     });
     let responseData: any = {};
 
@@ -21,12 +21,14 @@ export class RolesService {
       responseData = await this.prisma.rolesOnAccounts.deleteMany({
         where: {
           ksn,
-          rid: role,
+          rid: {
+            in: roles,
+          },
         },
       });
     } catch (error) {
       logger.error({
-        message: `prisma.rolesOnAccounts.deleteMany failed for ${ksn} & ${role}: ${error.message}`,
+        message: `prisma.rolesOnAccounts.deleteMany failed for ${ksn} & ${roles}: ${error.message}`,
         error,
       });
       handlePrismaErrors(error);
@@ -66,13 +68,8 @@ export class RolesService {
       handlePrismaErrors(error);
     }
 
-    console.log(roles);
-    console.log(existingRoles);
-
     const cleanedRoles: string[] = [];
     const rolesOnAccountIds: string[] = existingRoles.map((role) => role.rid);
-
-    console.log(rolesOnAccountIds);
 
     for (let i = 0; i < roles.length; i++) {
       if (!rolesOnAccountIds.includes(roles[i])) {
@@ -111,6 +108,39 @@ export class RolesService {
       statusCode: 200,
       message: 'Added roles for user',
       data: responseData,
+    } as IResponse;
+  }
+
+  async replaceRolesForUser(
+    ksn: number,
+    newRoles: string[],
+    oldRoles: string[],
+  ): Promise<IResponse> {
+    logger.info('rolesService.replaceRolesForUser initiated', {
+      ksn,
+      newRoles,
+      oldRoles,
+    });
+
+    const removeResponse: IResponse = await this.removeRoleForUser(
+      ksn,
+      oldRoles,
+    );
+    const addResponse: IResponse = await this.addRolesForUser(ksn, newRoles);
+
+    logger.info({
+      message: 'rolesService.replaceRolesForUser succeeded',
+      removeResponse,
+      addResponse,
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Replaced roles for user',
+      data: {
+        removed: removeResponse.data,
+        added: addResponse.data,
+      },
     } as IResponse;
   }
 

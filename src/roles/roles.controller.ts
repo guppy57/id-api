@@ -19,7 +19,7 @@ export class RolesController {
   @Delete('')
   @UseGuards(new AppAuthGaurd())
   async removeRole(
-    @Body('role') role: string,
+    @Body('role') role: string[],
     @Body('ksn') ksn: number,
   ): Promise<IResponse> {
     logger.info('POST /roles/remove initiated');
@@ -37,15 +37,25 @@ export class RolesController {
     return this.rolesService.addRolesForUser(ksn, roles);
   }
 
+  @Post('replace')
+  @UseGuards(new AppAuthGaurd())
+  async replaceRoles(
+    @Body('new_roles') newRoles: string[],
+    @Body('old_roles') oldRoles: string[],
+    @Body('ksn') ksn: number,
+  ): Promise<IResponse> {
+    logger.info('POST /roles/replace initiated');
+    return this.rolesService.replaceRolesForUser(ksn, newRoles, oldRoles);
+  }
+
   // verify that a user has a specific role
   @Post('verify')
-  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  @UseGuards(new AppAuthGaurd())
   async verifyRoleForUser(
-    @Req() req: IAuthenticatedRequest,
+    @Body('ksn') ksn: number,
     @Body('roles') roles: string[],
   ): Promise<IResponse> {
     logger.info('POST /roles/verify initiated');
-    const ksn = req.kreativeAccount.ksn;
     return this.rolesService.verifyRolesForUser(ksn, roles);
   }
 }
