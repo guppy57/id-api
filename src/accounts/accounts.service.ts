@@ -1,4 +1,3 @@
-
 import {
   BadRequestException,
   ConflictException,
@@ -37,7 +36,7 @@ import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Injectable({})
 export class AccountsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   @Inject(PostageService)
   private readonly postage: PostageService;
@@ -573,6 +572,49 @@ export class AccountsService {
       logger.info({ message: `getAccount for ${ksn} succeeded`, payload });
       return payload;
     }
+  }
+
+  async getAccountByEmail(email: string): Promise<IResponse> {
+    let account: Account | undefined;
+
+    try {
+      logger.info(
+        `prisma.account.findFirst for ${email} in getAccountByEmail initiated`,
+      );
+      account = await this.prisma.account.findFirst({
+        where: {
+          email,
+        },
+      });
+    } catch (error) {
+      logger.error({
+        message: `prisma.account.findFirst for ${email} in getAccountByEmail failed`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    const payload: IResponse = {
+      statusCode: 200,
+      message: 'Get account by email passed',
+      data: {},
+    };
+
+    if (account === null || account === undefined) {
+      payload.data = null;
+    } else {
+      delete account.bpassword;
+      delete account.resetCode;
+      delete account.verifyCode;
+      payload.data = account;
+    }
+
+    logger.info({
+      message: `getAccountForEmail for ${email} succeeded`,
+      payload,
+    });
+
+    return payload;
   }
 
   async getAccountList(ksnList: number[]): Promise<IResponse> {

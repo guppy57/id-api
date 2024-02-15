@@ -27,7 +27,7 @@ import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Controller('accounts')
 export class AccountsController {
-  constructor(private readonly accountsService: AccountsService) { }
+  constructor(private readonly accountsService: AccountsService) {}
 
   @Post('signup')
   signup(@Body() dto: SignupDto): Promise<IResponse> {
@@ -69,6 +69,13 @@ export class AccountsController {
   getAccount(@Req() req: IAuthenticatedRequest): Promise<IResponse> {
     logger.info(`GET /accounts initiated`);
     return this.accountsService.getAccount(req);
+  }
+
+  @Get(':email')
+  @UseGuards(new AppAuthGaurd())
+  getAccountByEmail(@Param('email') email: string): Promise<IResponse> {
+    logger.info(`GET /accounts/${email} initiated`);
+    return this.accountsService.getAccountByEmail(email);
   }
 
   @Post('list')
