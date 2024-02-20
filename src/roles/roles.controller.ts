@@ -44,6 +44,16 @@ export class RolesController {
     return this.rolesService.addRolesForManyUsers(ksns, roles);
   }
 
+  @Delete('list')
+  @UseGuards(new AppAuthGaurd())
+  async removeRolesForManyUsers(
+    @Body('ksnList') ksns: number[],
+    @Body('role') roles: string,
+  ): Promise<IResponse> {
+    logger.info('POST /roles/list initiated');
+    return this.rolesService.removeRolesForManyUsers(ksns, roles);
+  }
+
   @Post('replace')
   @UseGuards(new AppAuthGaurd())
   async replaceRoles(

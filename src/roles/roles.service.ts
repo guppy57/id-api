@@ -154,6 +154,47 @@ export class RolesService {
     } as IResponse;
   }
 
+  async removeRolesForManyUsers(
+    ksnList: number[],
+    role: string,
+  ): Promise<IResponse> {
+    logger.info('rolesService.removeRolesForManyUsers initiated', {
+      ksnList,
+      role,
+    });
+
+    let responseData: any;
+
+    try {
+      responseData = await this.prisma.rolesOnAccounts.deleteMany({
+        where: {
+          ksn: {
+            in: ksnList,
+          },
+          rid: role,
+        },
+      });
+    } catch (error) {
+      logger.error({
+        message: `prisma.rolesOnAccounts.deleteMany in remove for many users failed for ${role}: ${error.message}`,
+        ksnList,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    logger.info({
+      message: 'rolesService.removeRolesForManyUsers succeeded',
+      responseData,
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Removed roles for many users',
+      data: responseData,
+    } as IResponse;
+  }
+
   async replaceRolesForUser(
     ksn: number,
     newRoles: string[],
