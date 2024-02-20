@@ -8,7 +8,7 @@ import compareRoles from '../../utils/compareRoles';
 
 @Injectable()
 export class RolesService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async removeRoleForUser(ksn: number, roles: string[]): Promise<IResponse> {
     logger.info('rolesService.removeRoleForUser initiated', {
