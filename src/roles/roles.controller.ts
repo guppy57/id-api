@@ -1,10 +1,7 @@
-import { Controller, UseGuards, Post, Delete, Body, Req } from '@nestjs/common';
-import { UserAuthGuard } from '../../guards/userAuth.guard';
+import { Controller, UseGuards, Post, Delete, Body } from '@nestjs/common';
 import { AppAuthGaurd } from '../../guards/appAuth.guard';
-import { RolesOnAccounts } from '@prisma/client';
 import { RolesService } from './roles.service';
 import { IResponse } from '../../types/IResponse';
-import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 import logger from '../../utils/logger';
 
 // for the sake of time, we are forgoing back office routes
@@ -13,7 +10,7 @@ import logger from '../../utils/logger';
 
 @Controller('roles')
 export class RolesController {
-  constructor(private readonly rolesService: RolesService) { }
+  constructor(private readonly rolesService: RolesService) {}
 
   // remove a role from a user
   @Delete('')
@@ -35,6 +32,16 @@ export class RolesController {
   ): Promise<IResponse> {
     logger.info('POST /roles/add initiated');
     return this.rolesService.addRolesForUser(ksn, roles);
+  }
+
+  @Post('list')
+  @UseGuards(new AppAuthGaurd())
+  async addRolesForManyUsers(
+    @Body('ksnList') ksns: number[],
+    @Body('role') roles: string,
+  ): Promise<IResponse> {
+    logger.info('POST /roles/list initiated');
+    return this.rolesService.addRolesForManyUsers(ksns, roles);
   }
 
   @Post('replace')

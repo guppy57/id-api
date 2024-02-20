@@ -8,7 +8,7 @@ import compareRoles from '../../utils/compareRoles';
 
 @Injectable()
 export class RolesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async removeRoleForUser(ksn: number, roles: string[]): Promise<IResponse> {
     logger.info('rolesService.removeRoleForUser initiated', {
@@ -107,6 +107,49 @@ export class RolesService {
     return {
       statusCode: 200,
       message: 'Added roles for user',
+      data: responseData,
+    } as IResponse;
+  }
+
+  async addRolesForManyUsers(
+    ksnList: number[],
+    role: string,
+  ): Promise<IResponse> {
+    logger.info('rolesService.addRolesForManyUsers initiated', {
+      ksnList,
+      role,
+    });
+
+    const rolesToAdd = ksnList.map((ksn) => {
+      return {
+        ksn,
+        rid: role,
+      };
+    });
+
+    let responseData: any;
+
+    try {
+      responseData = await this.prisma.rolesOnAccounts.createMany({
+        data: rolesToAdd,
+      });
+    } catch (error) {
+      logger.error({
+        message: `prisma.rolesOnAccounts.create failed for ${role}: ${error.message}`,
+        ksnList,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    logger.info({
+      message: 'rolesService.addRolesForManyUsers succeeded',
+      responseData,
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Added roles for many users',
       data: responseData,
     } as IResponse;
   }
