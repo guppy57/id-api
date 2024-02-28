@@ -950,7 +950,16 @@ export class AccountsService {
     logger.info(`updatePrefix for ${ksn} initiated with prefix ${prefix}`);
     let accountChange: any;
 
-    const validPrefixes = ['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Rev.', 'Sir', 'Miss'];
+    const validPrefixes = [
+      'Mr.',
+      'Mrs.',
+      'Ms.',
+      'Dr.',
+      'Rev.',
+      'Sir',
+      'Miss',
+      '',
+    ];
 
     // check if the prefix is valid
     if (!validPrefixes.includes(prefix)) {
