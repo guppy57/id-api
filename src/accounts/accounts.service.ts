@@ -36,7 +36,7 @@ import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Injectable({})
 export class AccountsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   @Inject(PostageService)
   private readonly postage: PostageService;
@@ -940,6 +940,51 @@ export class AccountsService {
 
     logger.info({
       message: `verifyEmailVerificationCode for ${ksn} succeeded`,
+      payload,
+      accountChange,
+    });
+    return payload;
+  }
+
+  async updatePrefix(ksn: number, prefix: string): Promise<IResponse> {
+    logger.info(`updatePrefix for ${ksn} initiated with prefix ${prefix}`);
+    let accountChange: any;
+
+    const validPrefixes = ['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Rev.', 'Sir', 'Miss'];
+
+    // check if the prefix is valid
+    if (!validPrefixes.includes(prefix)) {
+      logger.error(
+        `prefix ${prefix} is not a valid prefix for ${ksn}, BadRequestException thrown`,
+      );
+      throw new BadRequestException('prefix is not valid');
+    }
+
+    try {
+      // updates the prefix for the account
+      logger.info(`prisma.account.update in updatePrefix for ${ksn} initiated`);
+      accountChange = await this.prisma.account.update({
+        where: { ksn },
+        data: { prefix },
+      });
+    } catch (error) {
+      // handles any prisma errors
+      logger.info({
+        message: `prisma.account.update in updatePrefix for ${ksn} failed`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    // sends back account change and successful response
+    const payload: IResponse = {
+      statusCode: 200,
+      message: 'Prefix updated',
+      data: { accountChange },
+    };
+
+    logger.info({
+      message: `updatePrefix for ${ksn} succeeded`,
       payload,
       accountChange,
     });

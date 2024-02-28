@@ -27,7 +27,7 @@ import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Controller('accounts')
 export class AccountsController {
-  constructor(private readonly accountsService: AccountsService) {}
+  constructor(private readonly accountsService: AccountsService) { }
 
   @Post('signup')
   signup(@Body() dto: SignupDto): Promise<IResponse> {
@@ -139,5 +139,19 @@ export class AccountsController {
       body: dto,
     });
     return this.accountsService.verifyEmailVerificationCode(ksn, dto.code);
+  }
+
+  @Post('prefix')
+  @UseGuards(new UserAuthGuard(['KREATIVE_ID_USER']))
+  async updatePrefix(
+    @Req() req: IAuthenticatedRequest,
+    @Body('prefix') prefix: string,
+  ): Promise<IResponse> {
+    logger.info({
+      message: `POST /accounts/prefix initiated`,
+      data: req,
+    });
+    const ksn = req.kreativeAccount.ksn;
+    return this.accountsService.updatePrefix(ksn, prefix);
   }
 }
