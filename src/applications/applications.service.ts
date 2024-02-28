@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import { Application, Keychain } from '@prisma/client';
 import { customAlphabet } from 'nanoid';
 import { PrismaService } from '../prisma/prisma.service';
@@ -11,7 +10,7 @@ import logger from '../../utils/logger';
 
 @Injectable()
 export class ApplicationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   // creates a new, unique application id number
   async generateAIDN(): Promise<number> {
