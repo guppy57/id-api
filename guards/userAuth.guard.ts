@@ -17,11 +17,12 @@ const PORT = process.env.PORT ?? 3000;
 const AIDNs: number[] = [
   parseInt(process.env.HOST_AIDN),
   parseInt(process.env.MYKREATIVE_AIDN),
+  289473, // Kreative DocuVet AIDN
 ];
 
 @Injectable()
 export class UserAuthGuard implements CanActivate {
-  constructor(private readonly permissions: string[]) {}
+  constructor(private readonly permissions: string[]) { }
 
   canActivate(
     context: ExecutionContext,
