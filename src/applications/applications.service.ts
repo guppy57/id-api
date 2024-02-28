@@ -10,7 +10,7 @@ import logger from '../../utils/logger';
 
 @Injectable()
 export class ApplicationsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   // creates a new, unique application id number
   async generateAIDN(): Promise<number> {

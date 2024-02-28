@@ -27,7 +27,7 @@ import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
 
 @Controller('accounts')
 export class AccountsController {
-  constructor(private readonly accountsService: AccountsService) { }
+  constructor(private readonly accountsService: AccountsService) {}
 
   @Post('signup')
   signup(@Body() dto: SignupDto): Promise<IResponse> {

@@ -22,7 +22,7 @@ const AIDNs: number[] = [
 
 @Injectable()
 export class UserAuthGuard implements CanActivate {
-  constructor(private readonly permissions: string[]) { }
+  constructor(private readonly permissions: string[]) {}
 
   canActivate(
     context: ExecutionContext,
