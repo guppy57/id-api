@@ -152,6 +152,7 @@ export class AccountsController {
       data: req,
     });
     const ksn = req.kreativeAccount.ksn;
-    return this.accountsService.updatePrefix(ksn, prefix);
+    const aidn = req.requestingAIDN;
+    return this.accountsService.updatePrefix(ksn, prefix, aidn);
   }
 }
