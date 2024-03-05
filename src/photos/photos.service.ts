@@ -12,6 +12,7 @@ import { IResponse } from '../../types/IResponse';
 import { handlePrismaErrors } from '../../utils/handlePrismaErrors';
 import { IAuthenticatedRequest } from 'types/IAuthenticatedRequest';
 import logger from '../../utils/logger';
+import analytics from '../../utils/segment';
 
 const s3 = new S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -87,6 +88,16 @@ export class PhotosService {
       handlePrismaErrors(error);
     }
 
+    analytics.track({
+      userId: ksn.toString(),
+      event: 'photo_uploaded',
+      properties: {
+        photoUrl: uploadedPhoto.url,
+        category,
+        createdAt: uploadedPhoto.createdAt,
+      },
+    });
+
     logger.info({
       message: `prisma.photo.create succeeded for ${ksn}`,
       uploadedPhoto,
@@ -131,6 +142,17 @@ export class PhotosService {
       message: `prisma.photo.create succeeded for ${ksn}`,
       uploadedPhoto,
     });
+
+    analytics.track({
+      userId: ksn.toString(),
+      event: 'photo_uploaded',
+      properties: {
+        photoUrl: uploadedPhoto.url,
+        category,
+        createdAt: uploadedPhoto.createdAt,
+      },
+    });
+
     return uploadedPhoto;
   }
 
@@ -270,6 +292,16 @@ export class PhotosService {
       statusCode: 200,
       message: 'Photo deleted successfully',
     };
+
+    analytics.track({
+      userId: ksn.toString(),
+      event: 'photo_deleted',
+      properties: {
+        photoId: photoId.toString(),
+        photoUrl: photo.url,
+        category: photo.category,
+      },
+    });
 
     logger.info({ message: 'photos.service.deletePhoto succeeded', payload });
     return payload;
