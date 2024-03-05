@@ -13,6 +13,7 @@ jobs:
       MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
       SENTRY_DSN: ${{ secrets.SENTRY_DNS }}
       SUPER_SECRET: ${{ secrets.SUPER_SECRET }}
+      SEGMENT_WRITE_KEY: ${{ secrets.SEGMENT_WRITE_KEY }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
