@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { customAlphabet } from 'nanoid';
 import * as argon2 from 'argon2';
-
 import { Account, Keychain, RolesOnAccounts } from '@prisma/client';
 import {
   SigninDto,
@@ -33,7 +32,8 @@ import { KeychainDto } from '../keychains/keychains.dto';
 import { PostageDto } from '../postage/postage.dto';
 import logger from '../../utils/logger';
 import { IAuthenticatedRequest } from '../../types/IAuthenticatedRequest';
-
+import analytics from '../../utils/segment';
+import { getPrismaStyleDateTime } from '../../utils/prismaDate';
 @Injectable({})
 export class AccountsService {
   constructor(private readonly prisma: PrismaService) { }
@@ -256,11 +256,7 @@ export class AccountsService {
       message: `new welcome email initiated in signup for ${dto.email}`,
       postageDto: welcomeEmailData,
     });
-    const emailStatus: boolean = await this.postage.sendEmail(welcomeEmailData);
-
-    if (!emailStatus) {
-      logger.error(`new welcome email failed to send for ${dto.email}`);
-    }
+    this.postage.sendEmail(welcomeEmailData);
 
     // send back positive response, account object, and key
     const payload: IResponse = {
@@ -273,6 +269,28 @@ export class AccountsService {
       message: `signup succeeded for ${dto.email} + keychain id: ${keychain.id}`,
       payload,
     });
+
+    analytics.identify({
+      userId: ksn.toString(),
+      traits: {
+        email: account.email,
+        firstName: account.firstName,
+        lastName: account.lastName,
+        roles: roles,
+        avatar: account.profilePicture,
+        createdAt: account.createdAt,
+      },
+    });
+
+    analytics.track({
+      userId: ksn.toString(),
+      event: 'account_created',
+      properties: {
+        email: account.email,
+        aidn: dto.aidn,
+      },
+    });
+
     return payload;
   }
 
@@ -351,11 +369,7 @@ export class AccountsService {
       postageDto: loginEmailData,
     });
 
-    const emailStatus: boolean = await this.postage.sendEmail(loginEmailData);
-
-    if (!emailStatus) {
-      logger.error(`new login email failed to send for ${dto.email}`);
-    }
+    this.postage.sendEmail(loginEmailData);
 
     // send all necessary data back to the client
     const payload: IResponse = {
@@ -363,6 +377,27 @@ export class AccountsService {
       message: 'Account logged in',
       data: { account, keychain },
     };
+
+    analytics.identify({
+      userId: account.ksn.toString(),
+      traits: {
+        email: account.email,
+        firstName: account.firstName,
+        lastName: account.lastName,
+        roles: account.roles.map((role: RolesOnAccounts) => role.rid),
+        avatar: account.profilePicture,
+        updatedAt: account.updatedAt,
+      },
+    });
+
+    analytics.track({
+      userId: account.ksn.toString(),
+      event: 'account_signed_in',
+      properties: {
+        email: account.email,
+        aidn: dto.aidn,
+      },
+    });
 
     logger.info({ message: `signin for ${dto.email} succeeded`, payload });
     return payload;
@@ -475,6 +510,26 @@ export class AccountsService {
       data: { account },
     };
 
+    analytics.identify({
+      userId: account.ksn.toString(),
+      traits: {
+        email: account.email,
+        firstName: account.firstName,
+        lastName: account.lastName,
+        roles: account.roles.map((role: RolesOnAccounts) => role.rid),
+        avatar: account.profilePicture,
+        updatedAt: account.updatedAt,
+      },
+    });
+
+    analytics.track({
+      userId: account.ksn.toString(),
+      event: 'account_updated',
+      properties: {
+        email: account.email,
+      },
+    });
+
     logger.info({ message: 'updateAccount succeeded', payload });
     return payload;
   }
@@ -568,6 +623,15 @@ export class AccountsService {
         message: 'Account found',
         data: account,
       };
+
+      analytics.track({
+        userId: account.ksn.toString(),
+        event: 'account_updated_avatar',
+        properties: {
+          email: account.email,
+          avatar: account.profilePicture,
+        },
+      });
 
       logger.info({ message: `getAccount for ${ksn} succeeded`, payload });
       return payload;
@@ -708,11 +772,7 @@ export class AccountsService {
 
     // sends welcome email through PostageModule
     logger.info(`new reset code email initiated in signin for ${dto.email}`);
-    const emailStatus: boolean = await this.postage.sendEmail(codeEmailData);
-
-    if (!emailStatus) {
-      logger.error(`new reset code email failed to send for ${dto.email}`);
-    }
+    this.postage.sendEmail(codeEmailData);
 
     // sends resetCode and accountChange
     const payload: IResponse = {
@@ -810,21 +870,21 @@ export class AccountsService {
 
     // sends welcome email through PostageModule
     logger.info(`password changed email initiated for ${accountChange.email}`);
-    const emailStatus: boolean = await this.postage.sendEmail(
-      passwordNotificationEmail,
-    );
-
-    if (!emailStatus) {
-      logger.error(
-        `new password changed email failed to send for ${accountChange.email}`,
-      );
-    }
+    this.postage.sendEmail(passwordNotificationEmail);
 
     // sends back account change and successful response
     const payload: IResponse = {
       statusCode: 200,
       message: 'Password updated',
     };
+
+    analytics.track({
+      userId: ksn.toString(),
+      event: 'account_reset_password',
+      properties: {
+        email: accountChange.email,
+      },
+    });
 
     logger.info({
       message: `resetPassword for ${ksn} succeeded`,
@@ -872,11 +932,7 @@ export class AccountsService {
     logger.info(
       `new verification code email initiated in sendEmailVerificationCode for ${email}`,
     );
-    const emailStatus: boolean = await this.postage.sendEmail(codeEmailData);
-
-    if (!emailStatus) {
-      logger.error(`new verification code email failed to send for ${email}`);
-    }
+    this.postage.sendEmail(codeEmailData);
 
     // sends resetCode and accountChange
     const payload: IResponse = {
@@ -946,7 +1002,11 @@ export class AccountsService {
     return payload;
   }
 
-  async updatePrefix(ksn: number, prefix: string): Promise<IResponse> {
+  async updatePrefix(
+    ksn: number,
+    prefix: string,
+    aidn: number,
+  ): Promise<IResponse> {
     logger.info(`updatePrefix for ${ksn} initiated with prefix ${prefix}`);
     let accountChange: any;
 
@@ -991,6 +1051,23 @@ export class AccountsService {
       message: 'Prefix updated',
       data: { accountChange },
     };
+
+    analytics.identify({
+      userId: ksn.toString(),
+      traits: {
+        prefix: prefix,
+        updatedAt: getPrismaStyleDateTime(),
+      },
+    });
+
+    analytics.track({
+      userId: ksn.toString(),
+      event: 'account_updated',
+      properties: {
+        prefix: prefix,
+        aidn: aidn,
+      },
+    });
 
     logger.info({
       message: `updatePrefix for ${ksn} succeeded`,
