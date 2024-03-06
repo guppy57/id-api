@@ -273,6 +273,7 @@ export class AccountsService {
     analytics.identify({
       userId: ksn.toString(),
       traits: {
+        username: account.username,
         email: account.email,
         firstName: account.firstName,
         lastName: account.lastName,
@@ -381,6 +382,7 @@ export class AccountsService {
     analytics.identify({
       userId: account.ksn.toString(),
       traits: {
+        username: account.username,
         email: account.email,
         firstName: account.firstName,
         lastName: account.lastName,
@@ -513,6 +515,7 @@ export class AccountsService {
     analytics.identify({
       userId: account.ksn.toString(),
       traits: {
+        username: account.username,
         email: account.email,
         firstName: account.firstName,
         lastName: account.lastName,
