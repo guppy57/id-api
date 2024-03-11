@@ -15,6 +15,7 @@ import { IResponse } from 'types/IResponse';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 import logger from '../../utils/logger';
+import { createHmac } from 'crypto';
 
 const SECRET = process.env.SUPER_SECRET;
 
@@ -220,6 +221,14 @@ export class KeychainsService {
         account,
       },
     };
+
+    if (decodedKey.aidn === 289473) {
+      const secretKey = process.env.DOCUVET_INTERCOM_SECRET;
+      const intercomHash = createHmac('sha256', secretKey)
+        .update(account.ksn.toString())
+        .digest('hex');
+      payload.data.docuvetIntercomHash = intercomHash;
+    }
 
     logger.info({ message: 'verify keychain succeeded', payload });
     return payload;

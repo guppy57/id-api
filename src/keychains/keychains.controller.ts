@@ -4,17 +4,13 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
-  ParseIntPipe,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { VerifyKeychainDto, CloseKeychainDto } from './keychains.dto';
 import { KeychainsService } from './keychains.service';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
 import logger from '../../utils/logger';
-import { Request } from 'express';
 
 @Controller('keychains')
 export class KeychainsController {
