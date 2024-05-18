@@ -38,6 +38,8 @@ async function bootstrap() {
       'http://api.kreativedocuvet.com',
       'https://docuvet.kreativeusa.com',
       'http://docuvet.kreativeusa.com',
+      'http://docuvet-dev.kreativeusa.com',
+      'https://docuvet-dev.kreativeusa.com',
       'https://smyfcdrvmx.us-east-1.awsapprunner.com',
       'http ://smyfcdrvmx.us-east-1.awsapprunner.com',
     ],
