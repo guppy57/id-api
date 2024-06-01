@@ -260,13 +260,15 @@ export class KeychainsService {
     delete account.bpassword;
     delete account.resetCode;
 
+    const claims = decodedKey.claims ? decodedKey.claims : {};
+
     const payload: IResponse = {
       statusCode: 200,
       message: 'Keychain is valid',
       data: {
         keychain,
         account,
-        // claims
+        claims,
       },
     };
 
