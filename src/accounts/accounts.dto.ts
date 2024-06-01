@@ -32,6 +32,10 @@ export class SignupDto {
   @IsNumber()
   @Min(6)
   aidn: number;
+
+  @IsString()
+  @IsOptional()
+  environment?: string;
 }
 
 export class SigninDto {
@@ -50,6 +54,10 @@ export class SigninDto {
   @IsNotEmpty()
   @IsBoolean()
   rememberMe: boolean;
+
+  @IsString()
+  @IsOptional()
+  environment?: string;
 }
 
 export class UpdateAccountDto {

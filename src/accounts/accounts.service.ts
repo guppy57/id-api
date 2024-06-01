@@ -36,7 +36,7 @@ import analytics from '../../utils/segment';
 import { getPrismaStyleDateTime } from '../../utils/prismaDate';
 @Injectable({})
 export class AccountsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   @Inject(PostageService)
   private readonly postage: PostageService;
@@ -228,7 +228,13 @@ export class AccountsService {
     logger.info(`sensitive info for new account with ${dto.email} removed`);
 
     // sets up data for new Keychain with the keychain dto
-    const keychainData: KeychainDto = { ksn, aidn: dto.aidn, rememberMe: true };
+    const environment = dto.environment ? dto.environment : 'production';
+    const keychainData: KeychainDto = {
+      ksn,
+      aidn: dto.aidn,
+      rememberMe: true,
+      environment,
+    };
 
     // creates a new keychain for the newly created account with keychain data
     logger.info(`createKeychain in signup initiated with ${dto.email}`);
@@ -345,10 +351,12 @@ export class AccountsService {
     await this.roles.addRolesForUser(account.ksn, [baseRole]);
 
     // sets up data for new Keychain with the keychain dto
+    const environment = dto.environment ? dto.environment : 'production';
     const keychainData: KeychainDto = {
       ksn: account.ksn,
       aidn: dto.aidn,
       rememberMe: dto.rememberMe,
+      environment,
     };
 
     // creates a new keychain for the newly created account with keychain data
