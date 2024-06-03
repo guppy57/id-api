@@ -55,8 +55,8 @@ export class KeychainsService {
         },
       );
 
-      devClaimsUrl = application.devClaimsUrl + dto.ksn;
-      prodClaimsUrl = application.prodClaimsUrl + dto.ksn;
+      devClaimsUrl = application.devClaimsUrl + `/${dto.ksn}`;
+      prodClaimsUrl = application.prodClaimsUrl + `${dto.ksn}`;
     } catch (error) {
       logger.error({ message: 'prisma.application.findUnique failed', error });
       handlePrismaErrors(error);
@@ -66,14 +66,22 @@ export class KeychainsService {
     let claimsJson: any;
 
     if (devClaimsUrl || prodClaimsUrl) {
+
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (dto.aidn === 289473) {
+        headers['Docuvet-Api-Key'] = dto.environment === 'production' ? process.env.DOCUVET_API_KEY_PROD : process.env.DOCUVET_API_KEY_DEV;
+      } else {
+        headers['CLAIMS_API_KEY'] = process.env.CLAIMS_API_KEY;
+      }
+
       const claims: any = await fetch(
         dto.environment === 'production' ? prodClaimsUrl : devClaimsUrl,
         {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Claims-Api-Key': `Bearer ${process.env.CLAIMS_API_KEY}`,
-          },
+          headers,
         },
       );
 
