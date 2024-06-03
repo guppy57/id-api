@@ -66,13 +66,15 @@ export class KeychainsService {
     let claimsJson: any;
 
     if (devClaimsUrl || prodClaimsUrl) {
-
       const headers = {
         'Content-Type': 'application/json',
       };
 
       if (dto.aidn === 289473) {
-        headers['Docuvet-Api-Key'] = dto.environment === 'production' ? process.env.DOCUVET_API_KEY_PROD : process.env.DOCUVET_API_KEY_DEV;
+        headers['Docuvet-Api-Key'] =
+          dto.environment === 'production'
+            ? process.env.DOCUVET_API_KEY_PROD
+            : process.env.DOCUVET_API_KEY_DEV;
       } else {
         headers['CLAIMS_API_KEY'] = process.env.CLAIMS_API_KEY;
       }
