@@ -7,11 +7,15 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { VerifyKeychainDto, CloseKeychainDto, KeychainDto } from './keychains.dto';
+import {
+  VerifyKeychainDto,
+  CloseKeychainDto,
+  KeychainDto,
+} from './keychains.dto';
 import { KeychainsService } from './keychains.service';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
 import logger from '../../utils/logger';
-import { AppAuthGaurd } from 'guards/appAuth.guard';
+import { AppAuthGaurd } from '../../guards/appAuth.guard';
 
 @Controller('keychains')
 export class KeychainsController {
