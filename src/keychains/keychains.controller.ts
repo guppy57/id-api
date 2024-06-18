@@ -7,10 +7,11 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { VerifyKeychainDto, CloseKeychainDto } from './keychains.dto';
+import { VerifyKeychainDto, CloseKeychainDto, KeychainDto } from './keychains.dto';
 import { KeychainsService } from './keychains.service';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
 import logger from '../../utils/logger';
+import { AppAuthGaurd } from 'guards/appAuth.guard';
 
 @Controller('keychains')
 export class KeychainsController {
@@ -40,5 +41,18 @@ export class KeychainsController {
     });
 
     return this.keychainService.verifyKeychain(dto);
+  }
+
+  @Post('')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(new AppAuthGaurd())
+  createKeychain(@Body() dto: KeychainDto) {
+    logger.info({
+      message: 'POST /keychains/create initiated',
+      body: dto,
+    });
+
+    return this.keychainService.createKeychain(dto);
+    return '';
   }
 }
