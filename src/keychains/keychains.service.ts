@@ -65,23 +65,32 @@ export class KeychainsService {
     // make a get request to the claims url
     let claimsJson: any;
 
-    if (
-      (devClaimsUrl || prodClaimsUrl) &&
-      dto.aidn === 289473 &&
-      dto.environment
-    ) {
+    if ((devClaimsUrl || prodClaimsUrl) && dto.environment) {
       const isProd = dto.environment === 'production';
       const url = isProd ? prodClaimsUrl : devClaimsUrl;
-      const key = isProd
-        ? process.env.DOCUVET_API_KEY_PROD
-        : process.env.DOCUVET_API_KEY_DEV;
+      let headers: any = {
+        'Content-Type': 'application/json',
+      };
+
+      if (dto.aidn === 289473) {
+        const docuvetApiKey = isProd
+          ? process.env.DOCUVET_API_KEY_PROD
+          : process.env.DOCUVET_API_KEY_DEV;
+
+        headers = {
+          ...headers,
+          'Docuvet-Api-Key': docuvetApiKey,
+        };
+      } else {
+        headers = {
+          ...headers,
+          'Claims-Api-Key': process.env.CLAIMS_API_KEY,
+        };
+      }
 
       const claims: any = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Docuvet-Api-Key': key,
-        },
+        headers,
       });
 
       // if the claims request fails, throw an error
@@ -91,6 +100,7 @@ export class KeychainsService {
       }
 
       // if the claims request is successful, parse the response
+      logger.info('claims request successful');
       claimsJson = await claims.json();
     }
 
