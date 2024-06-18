@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Account, Keychain } from '@prisma/client';
+import { Account, Keychain, Application } from '@prisma/client';
 import { nanoid } from 'nanoid';
 import * as jwt from 'jsonwebtoken';
 import { PrismaService } from '../prisma/prisma.service';
@@ -41,11 +41,75 @@ export class KeychainsService {
     // creates a secure has to increase security of the JWT
     const secureHash: string = nanoid();
 
+    // gets claims based on the application
+    let devClaimsUrl: string;
+    let prodClaimsUrl: string;
+
+    try {
+      logger.info(
+        `prisma.application.findUnique initiated for aidn: ${dto.aidn}`,
+      );
+      const application: Application = await this.prisma.application.findUnique(
+        {
+          where: { aidn: dto.aidn },
+        },
+      );
+
+      devClaimsUrl = `${application.devClaimsUrl}/${dto.ksn}`;
+      prodClaimsUrl = `${application.prodClaimsUrl}/${dto.ksn}`;
+    } catch (error) {
+      logger.error({ message: 'prisma.application.findUnique failed', error });
+      handlePrismaErrors(error);
+    }
+
+    // make a get request to the claims url
+    let claimsJson: any;
+
+    if ((devClaimsUrl || prodClaimsUrl) && dto.environment) {
+      const isProd = dto.environment === 'production';
+      const url = isProd ? prodClaimsUrl : devClaimsUrl;
+      let headers: any = {
+        'Content-Type': 'application/json',
+      };
+
+      if (dto.aidn === 289473) {
+        const docuvetApiKey = isProd
+          ? process.env.DOCUVET_API_KEY_PROD
+          : process.env.DOCUVET_API_KEY_DEV;
+
+        headers = {
+          ...headers,
+          'Docuvet-Api-Key': docuvetApiKey,
+        };
+      } else {
+        headers = {
+          ...headers,
+          'Claims-Api-Key': process.env.CLAIMS_API_KEY,
+        };
+      }
+
+      const claims: any = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      // if the claims request fails, throw an error
+      if (!claims.ok) {
+        logger.error('claims request failed');
+        throw new InternalServerErrorException('Claims request failed');
+      }
+
+      // if the claims request is successful, parse the response
+      logger.info('claims request successful');
+      claimsJson = await claims.json();
+    }
+
     // create new JWT 'key'
     const key = jwt.sign(
       {
         ksn: dto.ksn,
         aidn: dto.aidn,
+        claims: claimsJson,
         createdAt,
         expiresAt,
         secureHash,
@@ -213,12 +277,15 @@ export class KeychainsService {
     delete account.bpassword;
     delete account.resetCode;
 
+    const claims = decodedKey.claims ? decodedKey.claims : {};
+
     const payload: IResponse = {
       statusCode: 200,
       message: 'Keychain is valid',
       data: {
         keychain,
         account,
+        claims,
       },
     };
 

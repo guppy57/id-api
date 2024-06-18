@@ -4,6 +4,7 @@ import {
   Min,
   IsString,
   IsBoolean,
+  IsOptional,
 } from 'class-validator';
 
 export class KeychainDto {
@@ -18,6 +19,10 @@ export class KeychainDto {
   @IsNotEmpty()
   @IsBoolean()
   rememberMe: boolean;
+
+  @IsString()
+  @IsOptional()
+  environment?: string;
 }
 
 export class VerifyKeychainDto {
