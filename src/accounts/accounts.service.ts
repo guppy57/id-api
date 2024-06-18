@@ -350,13 +350,11 @@ export class AccountsService {
     const baseRole = await this.applications.getBaseRole(dto.aidn);
     await this.roles.addRolesForUser(account.ksn, [baseRole]);
 
-    // sets up data for new Keychain with the keychain dto
-    const environment = dto.environment ? dto.environment : 'production';
     const keychainData: KeychainDto = {
       ksn: account.ksn,
       aidn: dto.aidn,
       rememberMe: dto.rememberMe,
-      environment,
+      environment: dto.environment,
     };
 
     // creates a new keychain for the newly created account with keychain data

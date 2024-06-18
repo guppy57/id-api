@@ -65,13 +65,18 @@ export class KeychainsService {
     // make a get request to the claims url
     let claimsJson: any;
 
-    if ((devClaimsUrl || prodClaimsUrl) && dto.aidn === 289473) {
+    if (
+      (devClaimsUrl || prodClaimsUrl) &&
+      dto.aidn === 289473 &&
+      dto.environment
+    ) {
       const isProd = dto.environment === 'production';
+      const url = isProd ? prodClaimsUrl : devClaimsUrl;
       const key = isProd
         ? process.env.DOCUVET_API_KEY_PROD
         : process.env.DOCUVET_API_KEY_DEV;
 
-      const claims: any = await fetch(isProd ? prodClaimsUrl : devClaimsUrl, {
+      const claims: any = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
