@@ -7,7 +7,11 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { VerifyKeychainDto, CloseKeychainDto, KeychainDto } from './keychains.dto';
+import {
+  VerifyKeychainDto,
+  CloseKeychainDto,
+  KeychainDto,
+} from './keychains.dto';
 import { KeychainsService } from './keychains.service';
 import { UserAuthGuard } from '../../guards/userAuth.guard';
 import logger from '../../utils/logger';
