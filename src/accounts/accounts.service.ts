@@ -232,7 +232,7 @@ export class AccountsService {
       ksn,
       aidn: dto.aidn,
       rememberMe: true,
-      environment: dto.environment,
+      environment: dto.environment ? dto.environment : 'production',
     };
 
     // creates a new keychain for the newly created account with keychain data
@@ -353,7 +353,7 @@ export class AccountsService {
       ksn: account.ksn,
       aidn: dto.aidn,
       rememberMe: dto.rememberMe,
-      environment: dto.environment,
+      environment: dto.environment ? dto.environment : 'production',
     };
 
     // creates a new keychain for the newly created account with keychain data
