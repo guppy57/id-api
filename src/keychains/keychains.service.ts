@@ -63,7 +63,7 @@ export class KeychainsService {
     }
 
     // make a get request to the claims url
-    let claimsJson: any;
+    let claimsJson: any = {};
 
     if ((devClaimsUrl || prodClaimsUrl) && dto.environment) {
       const isProd = dto.environment === 'production';
@@ -88,20 +88,28 @@ export class KeychainsService {
         };
       }
 
-      const claims: any = await fetch(url, {
-        method: 'GET',
-        headers,
-      });
+      let claims: any = {};
+
+      try {
+        claims = await fetch(url, {
+          method: 'GET',
+          headers,
+        });
+      } catch (error) {
+        console.log(error);
+        logger.error({ message: 'claims fetch failed', error });
+        //throw new InternalServerErrorException('Claims fetch failed');
+      }
 
       // if the claims request fails, throw an error
       if (!claims.ok) {
         logger.error('claims request failed');
-        throw new InternalServerErrorException('Claims request failed');
+        //throw new InternalServerErrorException('Claims request failed');
+      } else {
+        // if the claims request is successful, parse the response
+        logger.info('claims request successful');
+        claimsJson = await claims.json();
       }
-
-      // if the claims request is successful, parse the response
-      logger.info('claims request successful');
-      claimsJson = await claims.json();
     }
 
     // create new JWT 'key'
