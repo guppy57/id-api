@@ -65,22 +65,23 @@ model Keychain {
 }
 
 model Application {
-  aidn          Int           @id
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  name          String
-  callbackUrl   String        @default("#")
-  homepage      String        @default("#")
-  description   String        @default("#")
-  logoUrl       String        @default("#")
-  iconUrl       String        @default("#")
-  baseRole      String        @default("KREATIVE_USER")
-  devClaimsUrl  String?
-  prodClaimsUrl String?
-  keychains     Keychain[]
-  transactions  Transaction[]
-  roles         Role[]
-  permissions   Permission[]
+  aidn              Int           @id
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  name              String
+  callbackUrl       String        @default("#")
+  mobileCallbackUrl String        @default("#")
+  homepage          String        @default("#")
+  description       String        @default("#")
+  logoUrl           String        @default("#")
+  iconUrl           String        @default("#")
+  baseRole          String        @default("KREATIVE_USER")
+  devClaimsUrl      String?
+  prodClaimsUrl     String?
+  keychains         Keychain[]
+  transactions      Transaction[]
+  roles             Role[]
+  permissions       Permission[]
 }
 
 model Role {
