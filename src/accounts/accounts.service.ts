@@ -304,14 +304,22 @@ export class AccountsService {
   async signin(dto: SigninDto): Promise<IResponse> {
     let account: any;
     let passwordsMatch: boolean;
+    let where: any;
+
+    // create a regex expression to check if a string is an email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isEmail = emailRegex.test(dto.emailOrUsername);
+
+    if (isEmail) where = { email: dto.emailOrUsername.toLowerCase() };
+    else where = { username: dto.emailOrUsername.toLowerCase() };
 
     try {
       // finds the account in the database based on unique email
       logger.info(
-        `prisma.account.findUniqueOrThrow initiated for ${dto.email}`,
+        `prisma.account.findUniqueOrThrow initiated for ${dto.emailOrUsername}`,
       );
       account = await this.prisma.account.findUniqueOrThrow({
-        where: { email: dto.email.toLowerCase() },
+        where,
         include: {
           roles: true,
         },
@@ -319,7 +327,7 @@ export class AccountsService {
     } catch (error) {
       // handle any other prisma errors that occur
       logger.error({
-        message: `prisma.account.findUniqueOrThrow error: ${error} for ${dto.email}`,
+        message: `prisma.account.findUniqueOrThrow error: ${error} for ${dto.emailOrUsername}`,
         error,
       });
       handlePrismaErrors(error, 'No account found');
@@ -327,7 +335,9 @@ export class AccountsService {
 
     try {
       // check if password given matches password on file
-      logger.debug(`password matching for ${dto.email} with argon2 initiating`);
+      logger.debug(
+        `password matching for ${dto.emailOrUsername} with argon2 initiating`,
+      );
       passwordsMatch = await argon2.verify(account.bpassword, dto.password);
     } catch (error) {
       // internal failure
@@ -337,13 +347,13 @@ export class AccountsService {
 
     // throw 401 error since passwords do not match
     if (!passwordsMatch) {
-      logger.info(`password mismatch for ${dto.email}`);
+      logger.info(`password mismatch for ${dto.emailOrUsername}`);
       throw new UnauthorizedException('password mismatch');
     }
 
     delete account.bpassword;
     delete account.resetCode;
-    logger.info(`removed sensitive account info for ${dto.email}`);
+    logger.info(`removed sensitive account info for ${dto.emailOrUsername}`);
 
     // update user roles if needed
     const baseRole = await this.applications.getBaseRole(dto.aidn);
@@ -357,21 +367,23 @@ export class AccountsService {
     };
 
     // creates a new keychain for the newly created account with keychain data
-    logger.info(`createKeychain in signin initiated with ${dto.email}`);
+    logger.info(
+      `createKeychain in signin initiated with ${dto.emailOrUsername}`,
+    );
     const keychain: Keychain = await this.keychains.createKeychain(
       keychainData,
     );
 
     // creates the data for the login notification email
     const loginEmailData: PostageDto = {
-      toAddress: dto.email,
+      toAddress: account.email,
       template: 'new-login',
       data: [account.firstName],
     };
 
     // sends welcome email through PostageModule
     logger.info({
-      message: `new login email initiated in signin for ${dto.email}`,
+      message: `new login email initiated in signin for ${dto.emailOrUsername}`,
       postageDto: loginEmailData,
     });
 
@@ -406,7 +418,10 @@ export class AccountsService {
       },
     });
 
-    logger.info({ message: `signin for ${dto.email} succeeded`, payload });
+    logger.info({
+      message: `signin for ${dto.emailOrUsername} succeeded`,
+      payload,
+    });
     return payload;
   }
 

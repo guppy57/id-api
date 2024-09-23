@@ -40,8 +40,7 @@ export class SignupDto {
 
 export class SigninDto {
   @IsNotEmpty()
-  @IsEmail()
-  email: string;
+  emailOrUsername: string;
 
   @IsNotEmpty()
   password: string;
