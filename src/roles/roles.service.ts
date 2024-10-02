@@ -120,12 +120,39 @@ export class RolesService {
       role,
     });
 
-    const rolesToAdd = ksnList.map((ksn) => {
+    const rolesToAdd = [];
+
+    try {
+      const existingUsers = await this.prisma.account.findMany({
+        where: {
+          ksn: {
+            in: ksnList,
+          },
+        },
+        select: { ksn: true },
+      });
+
+      existingUsers.forEach((user) => {
+        rolesToAdd.push({
+          ksn: user.ksn,
+          rid: role,
+        });
+      });
+    } catch (error) {
+      logger.error({
+        message: `prisma.accounts.findMany failed for ${ksnList}: ${error.message}`,
+        error,
+      });
+      handlePrismaErrors(error);
+    }
+
+    if (rolesToAdd.length === 0) {
       return {
-        ksn,
-        rid: role,
-      };
-    });
+        statusCode: 400,
+        message: 'No valid users found to assign roles',
+        data: [],
+      } as IResponse;
+    }
 
     let responseData: any;
 
