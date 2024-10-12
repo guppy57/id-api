@@ -237,9 +237,8 @@ export class AccountsService {
 
     // creates a new keychain for the newly created account with keychain data
     logger.info(`createKeychain in signup initiated with ${dto.email}`);
-    const keychain: Keychain = await this.keychains.createKeychain(
-      keychainData,
-    );
+    const keychain: Keychain =
+      await this.keychains.createKeychain(keychainData);
 
     // adds a new photo for the user with the photos API that matches their profile picture
     await this.photos.uploadPhotoFromUrl(
@@ -370,9 +369,8 @@ export class AccountsService {
     logger.info(
       `createKeychain in signin initiated with ${dto.emailOrUsername}`,
     );
-    const keychain: Keychain = await this.keychains.createKeychain(
-      keychainData,
-    );
+    const keychain: Keychain =
+      await this.keychains.createKeychain(keychainData);
 
     // creates the data for the login notification email
     const loginEmailData: PostageDto = {
