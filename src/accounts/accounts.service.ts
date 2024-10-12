@@ -520,6 +520,19 @@ export class AccountsService {
       handlePrismaErrors(error);
     }
 
+    if (dto.password) {
+      // creates the data for the password reset notification email
+      const passwordNotificationEmail: PostageDto = {
+        toAddress: account.email,
+        template: 'password-changed',
+        data: [account.firstName],
+      };
+
+      // sends welcome email through PostageModule
+      logger.info(`password changed email initiated for ${account.email}`);
+      this.postage.sendEmail(passwordNotificationEmail);
+    }
+
     // delete sensitive information from account object
     delete account.bpassword;
     delete account.resetCode;
