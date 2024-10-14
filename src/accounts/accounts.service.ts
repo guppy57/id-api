@@ -510,6 +510,9 @@ export class AccountsService {
           ksn: req.kreativeAccount.ksn,
         },
         data: updateData,
+        include: {
+          roles: true,
+        },
       });
     } catch (error) {
       // handles any prisma errors
