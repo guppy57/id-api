@@ -162,9 +162,9 @@ export class AccountsService {
     const bpassword: string = await argon2.hash(dto.password);
     logger.info('new account password salted');
 
-    // add the appropriate profile picture for the user
-    const firstLetter = dto.firstName.charAt(0).toUpperCase();
-    const photoUrl = `https://cdn.kreativeusa.com/kreative_id/letter_avatars/${firstLetter}.png`;
+    // get a random number between 1 and 100 inclusive
+    const random = Math.floor(Math.random() * 99) + 1;
+    const photoUrl = `https://cdn.kreativeusa.com/kreative_id/happy_avatars/${random}.png`;
 
     const baseRole = await this.applications.getBaseRole(dto.aidn);
 
