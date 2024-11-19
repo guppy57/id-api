@@ -246,7 +246,7 @@ export class AccountsService {
       ksn,
       photoUrl,
       'avatar',
-      `${firstLetter}.png`,
+      `avatar_${random}.png`,
     );
 
     // creates the data for the new welcome email
@@ -522,6 +522,10 @@ export class AccountsService {
       });
       handlePrismaErrors(error);
     }
+
+    // go through all applications that have a sync url and update the account info there
+    // ideally we do this on a different thread
+    // because we know only kreative docuvet needs it, we'll just get that application
 
     if (dto.password) {
       // creates the data for the password reset notification email
