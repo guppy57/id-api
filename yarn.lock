@@ -1897,20 +1897,12 @@ aws-sdk@^2.1360.0:
     uuid "8.0.0"
     xml2js "0.5.0"
 
-axios@^0.27.2:
-  version "0.27.2"
-  resolved "https://registry.npmjs.org/axios/-/axios-0.27.2.tgz"
-  integrity sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==
+axios@^1.3.3, axios@^1.6.4:
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.4.tgz#184ee1f63d412caffcf30d2c50982253c3ee86e0"
+  integrity sha512-heJnIs6N4aa1eSthhN9M5ioILu8Wi8vmQW9iHQ9NUvfkJb0lEEDUiIdQNAuBtfUt3FxReaKdpQA5DbmMOqzF/A==
   dependencies:
-    follow-redirects "^1.14.9"
-    form-data "^4.0.0"
-
-axios@^1.2.5:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.2.5.tgz#858c129d286e7ee3b1e970961cde410ba3ea3740"
-  integrity sha512-9pU/8mmjSSOb4CXVsvGIevN+MlO/t9OWtKadTaLuN85Gge3HGorUckgp8A/2FH4V4hJ7JuQ3LIeI7KAV9ITZrQ==
-  dependencies:
-    follow-redirects "^1.15.0"
+    follow-redirects "^1.15.4"
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
@@ -3222,10 +3214,10 @@ fn.name@1.x.x:
   resolved "https://registry.yarnpkg.com/fn.name/-/fn.name-1.1.0.tgz#26cad8017967aea8731bc42961d04a3d5988accc"
   integrity sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw==
 
-follow-redirects@^1.14.9, follow-redirects@^1.15.0:
-  version "1.15.2"
-  resolved "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.2.tgz"
-  integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
+follow-redirects@^1.15.4:
+  version "1.15.4"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.4.tgz#cdc7d308bf6493126b17ea2191ea0ccf3e535adf"
+  integrity sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==
 
 for-each@^0.3.3:
   version "0.3.3"
@@ -4548,12 +4540,12 @@ mailgun-js@^0.22.0:
     proxy-agent "^3.0.3"
     tsscmp "^1.0.6"
 
-mailgun.js@^8.0.6:
-  version "8.0.6"
-  resolved "https://registry.npmjs.org/mailgun.js/-/mailgun.js-8.0.6.tgz"
-  integrity sha512-b+c7QO1T4oFsudEcRB2H7oZKth8ZDeYRW4xjW12QQVNYDSJCVxqSQfps6ofcH8fqcCMJdzc76HVNGdnUZgBPCw==
+mailgun.js@^8.1.0:
+  version "8.2.2"
+  resolved "https://registry.yarnpkg.com/mailgun.js/-/mailgun.js-8.2.2.tgz#97133d69fd76b77c67eedb394fd85b1875cac600"
+  integrity sha512-po/KtofzrTuKhHLenbmliDsVVOFANwcfDFUGnggwnyZJmZz7JgBlV6nzK9o2Fk+OK2SiBmJTK25RbkAj57Hd+Q==
   dependencies:
-    axios "^0.27.2"
+    axios "^1.3.3"
     base-64 "^1.0.0"
     url-join "^4.0.1"
 
