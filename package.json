@@ -37,7 +37,7 @@
     "@types/sharp": "^0.31.1",
     "argon2": "^0.30.3",
     "aws-sdk": "^2.1360.0",
-    "axios": "^1.2.5",
+    "axios": "^1.7.8",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "crypto": "^1.0.1",
